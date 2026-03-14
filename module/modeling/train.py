@@ -11,7 +11,7 @@ def randomforestregressormodel_train(dataset_train, random_seed, dropout_column,
     rf = RandomForestRegressor(random_state=random_seed)
     
     # Hyperparameter tuning using gridsearchCV
-    grid_model = GridSearchCV(rf, rf_parameters, refit = True, n_jobs = -1, verbose = 2)
+    grid_model = GridSearchCV(rf, rf_parameters, refit = True, n_jobs = -1, verbose = 0)
     grid_model.fit(X, y) 
     best_params = grid_model.best_params_
     best_rf_model = RandomForestRegressor(**best_params)
@@ -29,7 +29,7 @@ def lassoregressionmodel_train (dataset_train_sdd, random_seed, dropout_column, 
     param = {'alpha':alpha_range}
     
     # Hyperparameter tuning using gridsearchCV
-    lasso_grid_search = GridSearchCV(lasso_model, param_grid = param, refit = False, cv=5, n_jobs = -1, verbose = 2)
+    lasso_grid_search = GridSearchCV(lasso_model, param_grid = param, refit = False, cv=5, n_jobs = -1, verbose = 0)
     lasso_grid_search.fit(X, y)
     best_params = lasso_grid_search.best_params_
     best_lasso_model = Lasso(**best_params)
@@ -45,7 +45,7 @@ def supportvectormachinemodel_train(dataset_train_sdd, random_seed, dropout_colu
     y = dataset_train_sdd[dropout_column].values
     
     # Hyperparameter tuning using gridsearchCV 
-    svm_gridsearch = GridSearchCV(SVC(random_state=random_seed, probability = True), svm_parameters, refit = False, n_jobs = -1, verbose = 2) 
+    svm_gridsearch = GridSearchCV(SVC(random_state=random_seed, probability = True), svm_parameters, refit = False, n_jobs = -1, verbose = 0) 
     svm_gridsearch.fit(X, y)
     best_params = svm_gridsearch.best_params_
     best_svm_model = SVC(**best_params, probability = True)
