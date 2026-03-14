@@ -108,47 +108,26 @@ def save_plot(plt, plot_type):
     plt.savefig(plot_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-def generate_precision_plot(validation_data, rf_model, lasso_model, svm_model, do_save=False):
+def generate_precision_plot(validation_data, rf_model, lasso_model, svm_model, validation_data_scaled=None, do_save=False):
     """
     Generate a precision plot comparing the three models.
-    
+
     Args:
-        validation_data (pd.DataFrame): Validation dataset (unscaled)
+        validation_data (pd.DataFrame): Validation dataset (unscaled, used for RF)
         rf_model: Random Forest model
         lasso_model: Lasso model
         svm_model: SVM model
+        validation_data_scaled (pd.DataFrame): Scaled validation dataset (used for Lasso and SVM)
         do_save (bool): Whether to save the plot to a file
     """
     # Get dropout column from settings
     dropout_col = settings.get('dropout_column', 'Dropout')
-    
-    # Function to detect separator for CSV files
-    def detect_separator(file_path, target_column='Dropout'):
-        separators = [',', '\t', ';', '|']
-        for sep in separators:
-            try:
-                df_sample = pd.read_csv(file_path, sep=sep, nrows=5, engine='python')
-                if len(df_sample.columns) > 1 and target_column in df_sample.columns:
-                    return sep
-            except Exception as e:
-                continue
-        return ','
-    
-    # For Lasso and SVM, we need to use scaled data
-    # Try to load scaled data with automatic separator detection, but if not available, use the provided validation data
-    try:
-        # Detect the correct separator for the standardized data file
-        scaled_data_sep = detect_separator('data/interim/train_data_standardized.csv', dropout_col)
-        train_data_scaled = pd.read_csv('data/interim/train_data_standardized.csv', sep=scaled_data_sep, engine='python')
-        # Use scaled data for Lasso and SVM, unscaled for RF
-        rf_results = prepare_model_predictions(validation_data, rf_model, "rf")
-        lasso_results = prepare_model_predictions(train_data_scaled, lasso_model, "lasso")
-        svm_results = prepare_model_predictions(train_data_scaled, svm_model, "svm")
-    except FileNotFoundError:
-        # Fallback: use unscaled data for all models
-        rf_results = prepare_model_predictions(validation_data, rf_model, "rf")
-        lasso_results = prepare_model_predictions(validation_data, lasso_model, "lasso")
-        svm_results = prepare_model_predictions(validation_data, svm_model, "svm")
+
+    # Use scaled validation data for Lasso and SVM, unscaled for RF
+    rf_results = prepare_model_predictions(validation_data, rf_model, "rf")
+    scaled_data = validation_data_scaled if validation_data_scaled is not None else validation_data
+    lasso_results = prepare_model_predictions(scaled_data, lasso_model, "lasso")
+    svm_results = prepare_model_predictions(scaled_data, svm_model, "svm")
     
     # Calculate dropout rate
     dropout_rate = (len(validation_data[validation_data[dropout_col] == 1]) / len(validation_data)) * 100
@@ -174,47 +153,26 @@ def generate_precision_plot(validation_data, rf_model, lasso_model, svm_model, d
     
     return plt.gcf()
 
-def generate_sensitivity_plot(validation_data, rf_model, lasso_model, svm_model, do_save=False):
+def generate_sensitivity_plot(validation_data, rf_model, lasso_model, svm_model, validation_data_scaled=None, do_save=False):
     """
     Generates a sensitivity (recall) plot comparing the performance of different models.
-    
+
     Parameters:
-        validation_data: DataFrame containing validation data with 'Dropout' column (unscaled)
+        validation_data: DataFrame containing validation data with 'Dropout' column (unscaled, used for RF)
         rf_model: Trained Random Forest model
         lasso_model: Trained Lasso model
         svm_model: Trained SVM model
+        validation_data_scaled: DataFrame containing scaled validation data (used for Lasso and SVM)
         do_save: Boolean, whether to save the plot to file (default False)
     """
     # Get dropout column from settings
     dropout_col = settings.get('dropout_column', 'Dropout')
-    
-    # Function to detect separator for CSV files
-    def detect_separator(file_path, target_column='Dropout'):
-        separators = [',', '\t', ';', '|']
-        for sep in separators:
-            try:
-                df_sample = pd.read_csv(file_path, sep=sep, nrows=5, engine='python')
-                if len(df_sample.columns) > 1 and target_column in df_sample.columns:
-                    return sep
-            except Exception as e:
-                continue
-        return ','
-    
-    # For Lasso and SVM, we need to use scaled data
-    # Try to load scaled data with automatic separator detection, but if not available, use the provided validation data
-    try:
-        # Detect the correct separator for the standardized data file
-        scaled_data_sep = detect_separator('data/interim/train_data_standardized.csv', dropout_col)
-        train_data_scaled = pd.read_csv('data/interim/train_data_standardized.csv', sep=scaled_data_sep, engine='python')
-        # Use scaled data for Lasso and SVM, unscaled for RF
-        rf_results = prepare_model_predictions(validation_data, rf_model, "rf")
-        lasso_results = prepare_model_predictions(train_data_scaled, lasso_model, "lasso")
-        svm_results = prepare_model_predictions(train_data_scaled, svm_model, "svm")
-    except FileNotFoundError:
-        # Fallback: use unscaled data for all models
-        rf_results = prepare_model_predictions(validation_data, rf_model, "rf")
-        lasso_results = prepare_model_predictions(validation_data, lasso_model, "lasso")
-        svm_results = prepare_model_predictions(validation_data, svm_model, "svm")
+
+    # Use scaled validation data for Lasso and SVM, unscaled for RF
+    rf_results = prepare_model_predictions(validation_data, rf_model, "rf")
+    scaled_data = validation_data_scaled if validation_data_scaled is not None else validation_data
+    lasso_results = prepare_model_predictions(scaled_data, lasso_model, "lasso")
+    svm_results = prepare_model_predictions(scaled_data, svm_model, "svm")
     
     # Create sensitivity plot
     plt.figure(figsize=(10, 6))

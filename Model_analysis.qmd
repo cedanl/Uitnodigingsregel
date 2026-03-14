@@ -316,7 +316,7 @@ print(display_model_results(model_results, 'SVM'))
 
 # Generate the plot using test set data for consistency with evaluation
 # Use test_data_rf for RF, test_data_sdd for Lasso and SVM
-fig = generate_precision_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, do_save=False)
+fig = generate_precision_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, validation_data_scaled=test_data_sdd, do_save=False)
 plt.tight_layout(); plt.show()
 ```
 
@@ -331,7 +331,7 @@ plt.tight_layout(); plt.show()
 
 # Generate the plot using test set data for consistency with evaluation
 # Use test_data_rf for RF, test_data_sdd for Lasso and SVM
-fig = generate_sensitivity_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, do_save=False)
+fig = generate_sensitivity_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, validation_data_scaled=test_data_sdd, do_save=False)
 plt.tight_layout(); plt.show()
 ```
 
