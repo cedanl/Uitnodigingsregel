@@ -153,19 +153,24 @@ print(f"Opmerking: Deze analyse is uitgevoerd op {data_type} data.")
 
 try:
     # --- 1. Train/test split ---
-    # Use processed data for RF, scaled for Lasso/SVM
+    # Single split on unscaled data, then use same indices for scaled data
+    # This ensures RF, Lasso, and SVM are all evaluated on the exact same students
     X_train, X_test, y_train, y_test = train_test_split(
         train_processed.drop(dropout_column, axis=1),
         train_processed[dropout_column],
         test_size=0.2,
         random_state=42
     )
-    X_train_sdd, X_test_sdd, y_train_sdd, y_test_sdd = train_test_split(
-        train_df_sdd.drop(dropout_column, axis=1),
-        train_df_sdd[dropout_column],
-        test_size=0.2,
-        random_state=42
-    )
+    # Use the same split indices to slice the scaled data
+    # train_df_sdd has a reset index (0-based) from standardize_dataset,
+    # so we need positional indexing to match the same rows
+    train_positions = train_processed.index.get_indexer(X_train.index)
+    test_positions = train_processed.index.get_indexer(X_test.index)
+    X_train_sdd = train_df_sdd.drop(dropout_column, axis=1).iloc[train_positions].reset_index(drop=True)
+    X_test_sdd = train_df_sdd.drop(dropout_column, axis=1).iloc[test_positions].reset_index(drop=True)
+    y_train_sdd = train_df_sdd[dropout_column].iloc[train_positions].reset_index(drop=True)
+    y_test_sdd = train_df_sdd[dropout_column].iloc[test_positions].reset_index(drop=True)
+
     # Prepare test sets for evaluation
     test_data_rf = pd.concat([X_test, y_test], axis=1)
     test_data_sdd = pd.concat([X_test_sdd, y_test_sdd], axis=1)

@@ -392,7 +392,9 @@ def save_model_metrics(train_data, train_data_scaled, validation_data, validatio
 def save_threshold_analysis(train_data, train_data_scaled, validation_data, validation_data_scaled, rf_model, lasso_model, svm_model):
     """
     Generate and save threshold analysis for each model.
-    
+    Uses the same prepare_model_predictions/dynamische_evaluatie pipeline as the plots
+    to ensure consistent precision/recall values.
+
     Parameters:
         train_data: DataFrame containing unscaled training data (for Random Forest)
         train_data_scaled: DataFrame containing scaled training data (for Lasso and SVM)
@@ -402,84 +404,52 @@ def save_threshold_analysis(train_data, train_data_scaled, validation_data, vali
         lasso_model: Trained Lasso model
         svm_model: Trained SVM model
     """
-    def get_metrics_for_top_k_percent(y_true, y_pred, k_percent):
-        """Calculate precision and recall for top k% of predictions."""
-        n_samples = len(y_true)
-        n_select = int(n_samples * k_percent / 100)
-        
-        # Get indices of top k% predictions
-        top_k_indices = np.argsort(y_pred)[-n_select:]
-        
-        # Calculate metrics
-        selected_true = y_true.iloc[top_k_indices]
-        precision = selected_true.mean()
-        recall = selected_true.sum() / y_true.sum() if y_true.sum() > 0 else 0
-        
-        return precision, recall, k_percent
-    
-    # Prepare data for each model
-    # Random Forest uses unscaled data
-    X_val_rf = validation_data.drop('Dropout', axis=1)
-    y_val_rf = validation_data['Dropout']
-    
-    # Lasso and SVM use scaled data
-    X_val_scaled = validation_data_scaled.drop('Dropout', axis=1)
-    y_val_scaled = validation_data_scaled['Dropout']
-    
-    # Get predictions for each model using appropriate data
-    models = {
-        'Random Forest': (rf_model, X_val_rf, y_val_rf),
-        'Lasso': (lasso_model, X_val_scaled, y_val_scaled),
-        'SVM': (svm_model, X_val_scaled, y_val_scaled)
+    # Use the same pipeline as the plots: prepare_model_predictions -> dynamische_evaluatie
+    model_configs = {
+        'Random Forest': (validation_data, rf_model, 'rf'),
+        'Lasso': (validation_data_scaled, lasso_model, 'lasso'),
+        'SVM': (validation_data_scaled, svm_model, 'svm')
     }
-    
-    # Store results for each model
-    results = {}
-    
-    for name, (model, X_val, y_val) in models.items():
-        if name == 'SVM' and hasattr(model, 'predict_proba'):
-            y_pred = model.predict_proba(X_val)[:, 1]
-        else:
-            y_pred = model.predict(X_val)
-        results[name] = (y_val, y_pred)
-    
-    # Calculate metrics for each percentage step
-    percentages = np.arange(1, 101, 1)  # 1% to 100% in 1% steps
+
     metrics = {}
-    
-    for name, (y_true, y_pred) in results.items():
+    for name, (data, model, short_name) in model_configs.items():
+        eval_results = prepare_model_predictions(data, model, short_name)
+        precision_col = f'precision{short_name}'
+        recall_col = f'recall{short_name}'
+        pct_col = 'perc_uitgenodigde_studenten'
+
         model_metrics = []
-        for p in percentages:
-            precision, recall, k = get_metrics_for_top_k_percent(y_true, y_pred, p)
+        for _, row in eval_results.iterrows():
             model_metrics.append({
-                'percentage': k,
-                'precision': precision,
-                'recall': recall
+                'percentage': row[pct_col],
+                'precision': row[precision_col],
+                'recall': row[recall_col]
             })
         metrics[name] = pd.DataFrame(model_metrics)
-    
+
     # Save results to file
     reports_dir = os.path.join(settings['PROJ_ROOT'], 'reports')
     os.makedirs(reports_dir, exist_ok=True)
-    
+
     with open(os.path.join(reports_dir, 'threshold_analysis.txt'), 'w') as f:
         f.write("Threshold Analysis Results\n")
         f.write("=" * 80 + "\n\n")
-        
+
         for name, df in metrics.items():
             f.write(f"{name} Model:\n")
             f.write("-" * 40 + "\n")
             f.write("Percentage  Precision  Recall\n")
             f.write("-" * 40 + "\n")
-            
-            # Write metrics for key percentages
+
+            # Write metrics for key percentages (find closest match)
             key_percentages = [1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100]
             for p in key_percentages:
-                row = df[df['percentage'] == p].iloc[0]
-                f.write(f"{p:>9.0f}%  {row['precision']:>9.3f}  {row['recall']:>7.3f}\n")
-            
+                closest_idx = (df['percentage'] - p).abs().idxmin()
+                row = df.loc[closest_idx]
+                f.write(f"{row['percentage']:>9.1f}%  {row['precision']:>9.3f}  {row['recall']:>7.3f}\n")
+
             f.write("\n" + "=" * 80 + "\n\n")
-    
+
     return metrics
 
 def get_stoplight_evaluation(precision, recall):
@@ -502,54 +472,50 @@ def generate_stoplight_evaluation(model_predictions, invite_pct=20):
     Returns:
         Dict with evaluation results for each model
     """
-    def get_summary_message(precision, recall, pct, y_true, y_pred):
+    def get_summary_message(precision, recall, pct, total_students, total_dropouts):
         # Calculate numbers from percentages
-        total_students = len(y_true)  # Total number of students in dataset
         n_invited = int(total_students * pct / 100)  # Calculate from percentage
-        total_dropouts = y_true.sum()
-        n_identified = int(total_dropouts * recall)  # Number of dropouts identified
-        n_correct = int(n_invited * precision)  # Correct predictions among invited
-        
+        n_identified = int(total_dropouts * recall / 100)  # Number of dropouts identified
+        n_correct = int(n_invited * precision / 100)  # Correct predictions among invited
+
         return (
             f"Bij {pct}% uitgenodigde studenten ({n_invited} uit {total_students} studenten):\n"
-            f"- {recall*100:.1f}% van alle uitvallers wordt geïdentificeerd ({n_identified} van {total_dropouts} uitvallers)\n"
-            f"- {precision*100:.1f}% van de uitgenodigde studenten valt daadwerkelijk uit ({n_correct} van {n_invited} uitgenodigde studenten)"
+            f"- {recall:.1f}% van alle uitvallers wordt geïdentificeerd ({n_identified} van {total_dropouts} uitvallers)\n"
+            f"- {precision:.1f}% van de uitgenodigde studenten valt daadwerkelijk uit ({n_correct} van {n_invited} uitgenodigde studenten)"
         )
-    
-    def calculate_metrics_at_threshold(y_true, y_pred, threshold_pct):
-        n_samples = len(y_true)
-        n_select = int(n_samples * threshold_pct / 100)
-        
-        # Get indices of top k% predictions (highest predicted values)
-        top_k_indices = np.argsort(y_pred)[-n_select:]
-        
-        # Calculate metrics
-        selected_true = y_true.iloc[top_k_indices]
-        precision = selected_true.mean()
-        recall = selected_true.sum() / y_true.sum() if y_true.sum() > 0 else 0
-        
+
+    def get_metrics_from_eval_results(eval_results, model_name, threshold_pct):
+        """Extract precision and recall at a given threshold from dynamische_evaluatie results."""
+        pct_col = 'perc_uitgenodigde_studenten'
+        precision_col = f'precision{model_name}'
+        recall_col = f'recall{model_name}'
+
+        # Find the row closest to the threshold percentage
+        closest_idx = (eval_results[pct_col] - threshold_pct).abs().idxmin()
+        precision = eval_results.loc[closest_idx, precision_col]
+        recall = eval_results.loc[closest_idx, recall_col]
+
         return precision, recall
 
-    # Get predictions for each model with correct method
-    predictions = {}
+    # Get evaluation results for each model using the same pipeline as the plots
+    # Map model display names to the short names used by prepare_model_predictions
+    model_name_map = {'Random Forest': 'rf', 'Lasso': 'lasso', 'SVM': 'svm'}
+
+    eval_results_all = {}
+    model_data_info = {}
     for model_name, (data, model, needs_scaling) in model_predictions.items():
-        X = data.drop('Dropout', axis=1)
-        y = data['Dropout']
-        
+        dropout_col = settings.get('dropout_column', 'Dropout')
         try:
-            # Handle different model types correctly
-            if model_name == 'SVM':
-                # SVM should use predict_proba for probabilities
-                pred = model.predict_proba(X)[:, 1]
-            else:
-                # Random Forest and Lasso use predict() for regression values
-                pred = model.predict(X)
-            
-            predictions[model_name] = (y, pred)
-            
+            short_name = model_name_map.get(model_name, model_name.lower())
+            eval_results = prepare_model_predictions(data, model, short_name)
+            eval_results_all[model_name] = (eval_results, short_name)
+            model_data_info[model_name] = {
+                'total_students': len(data),
+                'total_dropouts': int(data[dropout_col].sum())
+            }
         except Exception as e:
             print(f"Warning: Prediction failed for {model_name}: {e}")
-            predictions[model_name] = (y, np.zeros(len(y)))
+            eval_results_all[model_name] = (None, model_name.lower())
     
     # Create figure with subplots
     fig = plt.figure(figsize=(12, 8))
@@ -567,29 +533,35 @@ def generate_stoplight_evaluation(model_predictions, invite_pct=20):
     thresholds = [20, 30, 40, 50]  # Percentages to evaluate
     summary_data = []
     evaluation_metrics = {}
-    
-    for model_name, (y_true, y_pred) in predictions.items():
+
+    for model_name, (eval_results, short_name) in eval_results_all.items():
+        if eval_results is None:
+            continue
         model_metrics = []
         for threshold in thresholds:
-            precision, recall = calculate_metrics_at_threshold(y_true, y_pred, threshold)
+            precision, recall = get_metrics_from_eval_results(eval_results, short_name, threshold)
+            # precision and recall from dynamische_evaluatie are already as fractions (0-1)
             model_metrics.append((threshold, precision, recall))
-            
+
             # If this is the main threshold (20%), get stoplight evaluation
             if threshold == invite_pct:
-                stoplight, status, message = get_stoplight_evaluation(precision*100, recall*100)
-                summary = get_summary_message(precision, recall, threshold, y_true, y_pred)
+                prec_pct = precision * 100
+                rec_pct = recall * 100
+                stoplight, status, message = get_stoplight_evaluation(prec_pct, rec_pct)
+                info = model_data_info[model_name]
+                summary = get_summary_message(prec_pct, rec_pct, threshold, info['total_students'], info['total_dropouts'])
                 evaluation_metrics[model_name] = {
-                    'precision': precision*100,
-                    'recall': recall*100,
+                    'precision': prec_pct,
+                    'recall': rec_pct,
                     'status': status,
                     'message': message,
                     'dutch_summary': summary
                 }
-        
+
         # Add to summary table data
         summary_data.append([
             model_name,
-            *[f"{p*100:.1f}% / {r*100:.1f}%".format(p=p, r=r) for _, p, r in model_metrics]
+            *[f"{p*100:.1f}% / {r*100:.1f}%" for _, p, r in model_metrics]
         ])
     
     # Create main dashboard table (20% threshold)
@@ -642,21 +614,21 @@ def generate_stoplight_evaluation(model_predictions, invite_pct=20):
     ax_precision = fig.add_subplot(gs[2, 0])
     ax_recall = fig.add_subplot(gs[2, 1])
     
-    # Plot precision and recall for each model
-    for model_name, (y_true, y_pred) in predictions.items():
-        # Calculate metrics for all percentages
-        percentages = np.arange(1, 101, 1)  # 1% to 100% in 1% steps
-        precisions = []
-        recalls = []
-        
-        for p in percentages:
-            precision, recall = calculate_metrics_at_threshold(y_true, y_pred, p)
-            precisions.append(precision*100)
-            recalls.append(recall*100)
-        
+    # Plot precision and recall for each model using eval results
+    for model_name, (eval_results, short_name) in eval_results_all.items():
+        if eval_results is None:
+            continue
+        pct_col = 'perc_uitgenodigde_studenten'
+        precision_col = f'precision{short_name}'
+        recall_col = f'recall{short_name}'
+
+        percentages = eval_results[pct_col].values
+        precisions = eval_results[precision_col].values * 100
+        recalls = eval_results[recall_col].values * 100
+
         # Plot precision
         ax_precision.plot(percentages, precisions, label=model_name)
-        
+
         # Plot recall
         ax_recall.plot(percentages, recalls, label=model_name)
     
@@ -758,19 +730,26 @@ def extract_model_data(lines, model_name):
 def sort_and_filter_data(data):
     """
     Sort and filter data to show specific percentages.
-    
+    Uses closest-match to handle percentages that don't land exactly on target values.
+
     Parameters:
         data: List of dictionaries with model data
-        
+
     Returns:
         DataFrame with filtered and sorted data
     """
     df = pd.DataFrame(data)
-    # Use the actual percentages from the threshold analysis file, but replace 1% with 2.5%
-    specific_pcts = [2.5, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
-    df = df[df['% Uitgenodigd'].isin(specific_pcts)].copy()
-    df = df.sort_values('% Uitgenodigd')
-    return df
+    target_pcts = [2.5, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
+
+    # For each target percentage, find the closest available row
+    selected_rows = []
+    for target in target_pcts:
+        closest_idx = (df['% Uitgenodigd'] - target).abs().idxmin()
+        selected_rows.append(df.loc[closest_idx])
+
+    result = pd.DataFrame(selected_rows).drop_duplicates()
+    result = result.sort_values('% Uitgenodigd')
+    return result
 
 def process_evaluation_results(evaluation_results):
     """
