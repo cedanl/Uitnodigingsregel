@@ -15,3 +15,6 @@
 | P11 | Makkelijker maken om meerdere groepen tegelijk te voorspellen | |
 | P12 | Het passend maken voor de eigen situatie en toewerken naar een meer schaalbare oplossing | |
 | P13 | Aansluiting op studenten informatiesysteem, opschalen en automatiseren | |
+| P14 | Uitnodigingsregel zomaar ingezet kan worden, ethisch gebruik niet gestimuleerd wordt | Roadmap 1 |
+| P15 | Doorlopende biasmonitoring| |
+| P16 | Doorlopende impactmonitoring| |
