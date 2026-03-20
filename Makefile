@@ -13,7 +13,7 @@ PYTHON_VERSION = 3.13
 ## Render Quarto notebooks
 .PHONY: render-notebooks
 render-notebooks:
-	quarto render notebooks
+	quarto render Model_analysis.qmd
 
 ## Install Python Dependencies
 .PHONY: requirements
@@ -26,17 +26,20 @@ clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 
-## Lint using flake8 and black (use `make format` to do formatting)
+## Lint using ruff
 .PHONY: lint
 lint:
-	uv run flake8 module
-	uv run isort --check --diff --profile black module
-	uv run black --check --config pyproject.toml module
+	uv run ruff check src app
 
-## Format source code with black
+## Format source code with ruff
 .PHONY: format
 format:
-	uv run black --config pyproject.toml module
+	uv run ruff format src app
+
+## Run tests
+.PHONY: test
+test:
+	uv run pytest
 
 #################################################################################
 # PROJECT RULES                                                                 #
@@ -46,6 +49,11 @@ format:
 .PHONY: run
 run:
 	uv run python main.py
+
+## Run the Streamlit app
+.PHONY: app
+app:
+	uv run streamlit run app/main.py
 
 #################################################################################
 # Self Documenting Commands                                                     #

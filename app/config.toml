@@ -1,0 +1,20 @@
+[paths]
+raw_data = "data/01-raw"
+prepared_data = "data/02-prepared"
+output_data = "data/03-output"
+models = "models"
+reports = "reports"
+
+[paths.demo]
+train = "data/01-raw/demo/synth_data_train.csv"
+pred = "data/01-raw/demo/synth_data_pred.csv"
+
+[paths.user_data]
+train = "data/01-raw/user_data/train.csv"
+pred = "data/01-raw/user_data/pred.csv"
+
+[settings]
+default_separator = "\t"
+dropout_column = "Dropout"
+studentnumber_column = "Studentnummer"
+random_seed = 42

@@ -1,6 +1,6 @@
 ---
 title: "Inzichten Modelresultaten"
-format: 
+format:
   html:
     toc: true
     toc-depth: 3
@@ -30,59 +30,51 @@ execute:
 #| label: setup
 #| echo: false
 
-import sys
-from module.plot import (
-    generate_precision_plot, 
-    generate_sensitivity_plot, 
-    generate_svm_importance_plot,
+import io
+import warnings
+from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
+
+import joblib
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from sklearn import tree
+from sklearn.model_selection import train_test_split
+
+from uitnodigingsregel.analyze import (
+    analyze_missing_data,
+    display_top_features,
+    parse_model_metrics,
+)
+from uitnodigingsregel.dataset import clean_data, detect_separator, remove_single_value_columns
+from uitnodigingsregel.evaluate import (
+    display_model_results,
     generate_stoplight_evaluation,
+    load_settings,
+    process_evaluation_results,
     save_model_metrics,
     save_threshold_analysis,
-    extract_model_data,
-    sort_and_filter_data,
-    process_evaluation_results,
-    display_model_results,
-    get_coefficient_table,
-    get_top_svm_features,
-    analyze_missing_data,
-    parse_model_metrics,
-    display_top_features
+)
+from uitnodigingsregel.features import convert_categorical_to_dummies, standardize_dataset
+from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
+from uitnodigingsregel.visualize import (
+    generate_precision_plot,
+    generate_sensitivity_plot,
+    generate_svm_importance_plot,
 )
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import joblib
-import os
-import warnings
-from sklearn.model_selection import train_test_split
-from sklearn import tree
-from contextlib import redirect_stdout, redirect_stderr
 warnings.filterwarnings('ignore')
 
-# Import custom modules
-from module.dataset import *
-from module.modeling.train import *
-from module.modeling.predict import *
-from module.features import *
-import yaml
-
-# Load config and apply settings
-def load_settings(config_file, settings_type='default'):
-    with open(config_file, 'r') as file:
-        config = yaml.safe_load(file)
-    if settings_type == 'default':
-        settings = config['default_settings']
-    elif settings_type == 'custom':
-        settings = config['custom_settings']
-    else:
-        raise ValueError("No settings found. Choose 'default' or 'custom'.")
-    return settings
-
-config_file = 'config.yaml'
-settings = load_settings(config_file, 'default')
-globals().update(settings)
+# Load settings explicitly
+settings = load_settings(config_file='config.yaml', settings_type='default')
+retrain_models = settings['retrain_models']
+dropout_column = settings['dropout_column']
+random_seed = settings['random_seed']
+rf_parameters = settings['rf_parameters']
+alpha_range = settings['alpha_range']
+svm_parameters = settings['svm_parameters']
 
 # Set plot styling
 sns.set_theme(style="whitegrid")
@@ -92,54 +84,24 @@ plt.rcParams['axes.formatter.limits'] = (-2, 2)
 sns.set_style("whitegrid")
 sns.set_context("notebook", font_scale=1.2)
 
-# Function to detect the correct separator for CSV files
-def detect_separator(file_path, target_column='Dropout'):
-    """
-    Automatically detect the separator used in a CSV file.
-    
-    Parameters:
-        file_path: Path to the CSV file
-        target_column: Name of the target column to look for
-        
-    Returns:
-        The detected separator (comma, tab, semicolon, etc.)
-    """
-    separators = [',', '\t', ';', '|']
-    
-    for sep in separators:
-        try:
-            # Read first few lines to test
-            df_sample = pd.read_csv(file_path, sep=sep, nrows=5, engine='python')
-            
-            # Check if parsing was successful and contains target column
-            if len(df_sample.columns) > 1 and target_column in df_sample.columns:
-                return sep
-        except Exception as e:
-            continue
-    
-    # Fallback to comma if nothing works
-    return ','
-
 # Data loading: use user data if present, otherwise use synthetic data (training data only)
-if os.path.exists(user_data_dir_train):
-    # Detect separator for user data
-    train_sep = detect_separator(user_data_dir_train, dropout_column)
-    train_df = pd.read_csv(user_data_dir_train, sep=train_sep, engine='python')
+user_train_path = Path(settings['user_data_dir_train'])
+if user_train_path.exists():
+    train_sep = detect_separator(user_train_path, dropout_column)
+    train_df = pd.read_csv(user_train_path, sep=train_sep, engine='python')
     data_type = "instelling"
 else:
-    # Detect separator for synthetic data
-    train_sep = detect_separator(synth_data_dir_train, dropout_column)
-    train_df = pd.read_csv(synth_data_dir_train, sep=train_sep, engine='python')
+    synth_train_path = Path(settings['synth_data_dir_train'])
+    train_sep = detect_separator(synth_train_path, dropout_column)
+    train_df = pd.read_csv(synth_train_path, sep=train_sep, engine='python')
     data_type = "synthetische"
 
-train_cleaned = basic_cleaning(train_df)
-# Create a copy of train_cleaned for prediction data (needed for processing functions)
+train_cleaned = clean_data(train_df)
 pred_cleaned = train_cleaned.copy()
 train_cleaned, pred_cleaned = remove_single_value_columns(train_cleaned, pred_cleaned)
-train_processed, pred_processed = convert_categorical_to_dummies(train_cleaned, pred_cleaned, dropout_column, separator)
-train_df_sdd, pred_df_sdd = standardize_dataset(train_processed, pred_processed, dropout_column, separator)
+train_processed, pred_processed = convert_categorical_to_dummies(train_cleaned, pred_cleaned, dropout_column)
+train_df_sdd, pred_df_sdd = standardize_dataset(train_processed, pred_processed, dropout_column)
 
-# Message is shown based on data_type
 print(f"Opmerking: Deze analyse is uitgevoerd op {data_type} data.")
 ```
 
@@ -153,17 +115,12 @@ print(f"Opmerking: Deze analyse is uitgevoerd op {data_type} data.")
 
 try:
     # --- 1. Train/test split ---
-    # Single split on unscaled data, then use same indices for scaled data
-    # This ensures RF, Lasso, and SVM are all evaluated on the exact same students
     X_train, X_test, y_train, y_test = train_test_split(
         train_processed.drop(dropout_column, axis=1),
         train_processed[dropout_column],
         test_size=0.2,
         random_state=42
     )
-    # Use the same split indices to slice the scaled data
-    # train_df_sdd has a reset index (0-based) from standardize_dataset,
-    # so we need positional indexing to match the same rows
     train_positions = train_processed.index.get_indexer(X_train.index)
     test_positions = train_processed.index.get_indexer(X_test.index)
     X_train_sdd = train_df_sdd.drop(dropout_column, axis=1).iloc[train_positions].reset_index(drop=True)
@@ -171,37 +128,31 @@ try:
     y_train_sdd = train_df_sdd[dropout_column].iloc[train_positions].reset_index(drop=True)
     y_test_sdd = train_df_sdd[dropout_column].iloc[test_positions].reset_index(drop=True)
 
-    # Prepare test sets for evaluation
     test_data_rf = pd.concat([X_test, y_test], axis=1)
     test_data_sdd = pd.concat([X_test_sdd, y_test_sdd], axis=1)
 
-    # Make test data available globally for plotting functions
-    globals()['test_data_rf'] = test_data_rf
-    globals()['test_data_sdd'] = test_data_sdd
-
     # --- 2. Train or load models ---
     if retrain_models:
-        # Suppress GridSearchCV output during training
-        with open(os.devnull, 'w') as fnull:
-            with redirect_stdout(fnull), redirect_stderr(fnull):
-                best_rf_model = randomforestregressormodel_train(pd.concat([X_train, y_train], axis=1), random_seed, dropout_column, rf_parameters)
-                best_lasso_model = lassoregressionmodel_train(pd.concat([X_train_sdd, y_train_sdd], axis=1), random_seed, dropout_column, alpha_range)
-                best_svm_model = supportvectormachinemodel_train(pd.concat([X_train_sdd, y_train_sdd], axis=1), random_seed, dropout_column, svm_parameters)
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                best_rf_model = train_random_forest(pd.concat([X_train, y_train], axis=1), random_seed, dropout_column, rf_parameters)
+                best_lasso_model = train_lasso(pd.concat([X_train_sdd, y_train_sdd], axis=1), random_seed, dropout_column, alpha_range)
+                best_svm_model = train_svm(pd.concat([X_train_sdd, y_train_sdd], axis=1), random_seed, dropout_column, svm_parameters)
     else:
         best_rf_model = joblib.load('models/random_forest_regressor.joblib')
         best_lasso_model = joblib.load('models/lasso_regression.joblib')
         best_svm_model = joblib.load('models/support_vector_machine.joblib')
 
-    # --- 3. Modular stoplight evaluation on test set ---
+    # --- 3. Stoplight evaluation on test set ---
     model_predictions = {
         'Random Forest': (test_data_rf, best_rf_model, False),
         'Lasso': (test_data_sdd, best_lasso_model, True),
         'SVM': (test_data_sdd, best_svm_model, True)
     }
-    
+
     evaluation_results = generate_stoplight_evaluation(
         model_predictions,
-        invite_pct=20
+        invite_pct=20,
+        dropout_column=dropout_column
     )
 
     # --- 4. Save metrics and threshold analysis on test set ---
@@ -214,7 +165,8 @@ try:
             validation_data_scaled=test_data_sdd,
             rf_model=best_rf_model,
             lasso_model=best_lasso_model,
-            svm_model=best_svm_model
+            svm_model=best_svm_model,
+            dropout_column=dropout_column
         )
         save_threshold_analysis(
             train_data=pd.concat([X_train, y_train], axis=1),
@@ -223,19 +175,19 @@ try:
             validation_data_scaled=test_data_sdd,
             rf_model=best_rf_model,
             lasso_model=best_lasso_model,
-            svm_model=best_svm_model
+            svm_model=best_svm_model,
+            dropout_column=dropout_column
         )
 except Exception as e:
     print(f"Error in stoplight evaluation: {e}")
     import traceback
     traceback.print_exc()
 
-# Process evaluation results using imported functions
 model_results, best_model, best_metrics, recommendation_display, recommendation_text = process_evaluation_results(evaluation_results)
 
 print(recommendation_display)
-print("\n" + recommendation_text + " Het best presterende model is " + 
-      best_model + 
+print("\n" + recommendation_text + " Het best presterende model is " +
+      best_model +
       ", dat de beste balans laat zien tussen precisie en recall bij een selectie van 20% van de studenten voor uitnodiging. " +
       "Dit impliceert dat dit model het meest effectief is in het identificeren van studenten met een verhoogd risico op uitval.")
 
@@ -284,7 +236,6 @@ Tot slot bieden hoofdstukken 5, 6 en 7 inzicht in de prestaties en relevantie va
 #| label: rf-results
 #| output: asis
 #| echo: false
-# Display the stored results for Random Forest
 print(display_model_results(model_results, 'Random Forest'))
 ```
 
@@ -294,7 +245,6 @@ print(display_model_results(model_results, 'Random Forest'))
 #| label: lasso-results
 #| output: asis
 #| echo: false
-# Display the stored results for Lasso
 print(display_model_results(model_results, 'Lasso'))
 ```
 
@@ -304,7 +254,6 @@ print(display_model_results(model_results, 'Lasso'))
 #| label: svm-results
 #| output: asis
 #| echo: false
-# Display the stored results for SVM
 print(display_model_results(model_results, 'SVM'))
 ```
 
@@ -319,9 +268,7 @@ print(display_model_results(model_results, 'SVM'))
 #| fig-width: 10
 #| fig-height: 6
 
-# Generate the plot using test set data for consistency with evaluation
-# Use test_data_rf for RF, test_data_sdd for Lasso and SVM
-fig = generate_precision_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, validation_data_scaled=test_data_sdd, do_save=False)
+fig = generate_precision_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, validation_data_scaled=test_data_sdd, dropout_column=dropout_column, do_save=False)
 plt.tight_layout(); plt.show()
 ```
 
@@ -334,9 +281,7 @@ plt.tight_layout(); plt.show()
 #| fig-width: 10
 #| fig-height: 6
 
-# Generate the plot using test set data for consistency with evaluation
-# Use test_data_rf for RF, test_data_sdd for Lasso and SVM
-fig = generate_sensitivity_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, validation_data_scaled=test_data_sdd, do_save=False)
+fig = generate_sensitivity_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, validation_data_scaled=test_data_sdd, dropout_column=dropout_column, do_save=False)
 plt.tight_layout(); plt.show()
 ```
 
@@ -346,10 +291,8 @@ plt.tight_layout(); plt.show()
 #| label: model-metrics
 #| output: asis
 
-# Parse model metrics using helper function
 metrics_data = parse_model_metrics()
 
-# Print the formatted table
 if metrics_data:
     print("\n| Model | R² (train) | MSE (train) | R² (test) | MSE (test) |")
     print("|:------|:-----------|:------------|:----------|:-----------|")
@@ -363,18 +306,18 @@ print("""
 ### Interpretatie van de Metrics
 
 1. **Overfitting:**
-   Wanneer een model aanzienlijk beter presteert op de trainingsdata dan op de testdata, kan dit wijzen op overfitting. 
-   Het model heeft dan niet alleen de onderliggende patronen geleerd, maar ook de ruis of uitzonderingen in de trainingsset, 
+   Wanneer een model aanzienlijk beter presteert op de trainingsdata dan op de testdata, kan dit wijzen op overfitting.
+   Het model heeft dan niet alleen de onderliggende patronen geleerd, maar ook de ruis of uitzonderingen in de trainingsset,
    waardoor het minder goed generaliseert naar nieuwe data.
 
 2. **Underfitting:**
-   Als een model zowel op de trainings- als testdata slecht presteert, kan er sprake zijn van underfitting. 
-   Dit houdt in dat het model te simpel is om de relevante patronen in de data te herkennen, of dat de gebruikte 
+   Als een model zowel op de trainings- als testdata slecht presteert, kan er sprake zijn van underfitting.
+   Dit houdt in dat het model te simpel is om de relevante patronen in de data te herkennen, of dat de gebruikte
    features onvoldoende informatief zijn.
 
 3. **Negatieve R²-waarde:**
-   Een negatieve R²-waarde betekent dat het model slechter presteert dan simpelweg het gemiddelde van de doelvariabele 
-   voorspellen. Dit kan wijzen op een verkeerd gekozen model, slecht afgestemde hyperparameters of structurele 
+   Een negatieve R²-waarde betekent dat het model slechter presteert dan simpelweg het gemiddelde van de doelvariabele
+   voorspellen. Dit kan wijzen op een verkeerd gekozen model, slecht afgestemde hyperparameters of structurele
    problemen in de data.
 """)
 ```
@@ -386,16 +329,13 @@ print("""
 #| label: missing-analysis 1
 #| output: asis
 
-# Analyze missing data using helper function (using raw data for transparency)
 missing_summary, total_missing, total_rows, total_cols, missing_cols = analyze_missing_data(train_df)
 
-# Print summary
 print(f"- Totaal aantal rijen: {total_rows:,}")
 print(f"- Totaal aantal kolommen: {total_cols}")
 print(f"- Totaal aantal missing values: {total_missing:,}")
 print(f"- Aantal kolommen met missing values: {missing_cols}")
 print(f"- Percentage rijen met minstens één missing value: {(train_df.isnull().any(axis=1).sum() / total_rows * 100):.1f}%\n")
-
 ```
 
 ## Missing Values per Kolom
@@ -403,7 +343,6 @@ print(f"- Percentage rijen met minstens één missing value: {(train_df.isnull()
 #| label: missing-analysis 2
 #| output: asis
 
-# Print missing values per column
 if total_missing > 0:
     print("\n## Missing Values per Kolom\n")
     print("| Kolom | Type | Aantal Missing | Percentage Missing |")
@@ -422,7 +361,6 @@ else:
 #| fig-cap: "Heatmap van missing values in de dataset"
 #| fig-height: 8
 
-# Create a heatmap of missing values (using raw data for transparency)
 fig, ax = plt.subplots(figsize=(12, 8))
 sns.heatmap(train_df.isnull(), yticklabels=False, cbar=False, cmap='viridis', ax=ax)
 ```
@@ -433,7 +371,6 @@ sns.heatmap(train_df.isnull(), yticklabels=False, cbar=False, cmap='viridis', ax
 #| label: lasso-features
 #| output: asis
 
-# Display top 5 Lasso features using helper function (Lasso needs scaled data)
 print(display_top_features(best_lasso_model, train_df_sdd, 'lasso', n_features=5, dropout_column=dropout_column))
 ```
 
@@ -443,7 +380,6 @@ print(display_top_features(best_lasso_model, train_df_sdd, 'lasso', n_features=5
 #| label: rf-features
 #| output: asis
 
-# Display top 5 Random Forest features using helper function
 print(display_top_features(best_rf_model, train_processed, 'rf', n_features=5, dropout_column=dropout_column))
 ```
 
@@ -455,24 +391,18 @@ print(display_top_features(best_rf_model, train_processed, 'rf', n_features=5, d
 #| fig-width: 10
 #| fig-height: 6
 
-# Get the first tree from the forest
 first_tree = best_rf_model.estimators_[0]
-
-# Create figure
 fig, ax = plt.subplots(figsize=(10, 6))
-
-# Plot the tree
 tree.plot_tree(
     first_tree,
     feature_names=train_processed.drop(dropout_column, axis=1).columns,
     class_names=['Geen Uitval', 'Uitval'],
-    max_depth=3,  # Limit depth for better visibility
+    max_depth=3,
     fontsize=8,
     filled=True,
     rounded=True,
     ax=ax
 )
-
 plt.tight_layout()
 ```
 
@@ -482,7 +412,6 @@ plt.tight_layout()
 #| label: svm-features-text
 #| output: asis
 
-# Display top 5 SVM features using helper function (SVM needs scaled data)
 print(display_top_features(best_svm_model, train_df_sdd, 'svm', n_features=5, dropout_column=dropout_column))
 ```
 
@@ -495,8 +424,7 @@ print(display_top_features(best_svm_model, train_df_sdd, 'svm', n_features=5, dr
 #| fig-width: 14
 #| fig-height: 10
 
-# Generate the plot
-fig = generate_svm_importance_plot(train_processed, best_svm_model, train_data_sdd=train_df_sdd, do_save=False)
+fig = generate_svm_importance_plot(train_processed, best_svm_model, train_data_sdd=train_df_sdd, dropout_column=dropout_column, do_save=False)
 ```
 
 # Uitleg
@@ -523,18 +451,18 @@ Het stoplichtsysteem evalueert de bruikbaarheid van voorspellende modellen voor 
 
 In dit rapport richten we ons specifiek op een scenario waarbij 20% van alle studenten wordt uitgenodigd voor een gesprek. De keuze voor dit percentage is gebaseerd op de praktijk: bij beperkte middelen moeten vooral die studenten worden geïdentificeerd die het hoogste risico op uitval lopen. Het model moet dus effectief zijn in het correct selecteren van deze top 20%.
 
-Hoewel we op basis van dit criterium modellen beoordelen, benadrukken we dat het aanbevolen wordt om uiteindelijk alle studenten te spreken. De modelanalyse dient daarbij als hulpmiddel om prioriteiten te stellen, niet om studenten uit te sluiten. 
+Hoewel we op basis van dit criterium modellen beoordelen, benadrukken we dat het aanbevolen wordt om uiteindelijk alle studenten te spreken. De modelanalyse dient daarbij als hulpmiddel om prioriteiten te stellen, niet om studenten uit te sluiten.
 
 Het systeem gebruikt drie kleuren om de bruikbaarheid aan te duiden:
 
 - 🟢 **Groen**: Model presteert goed voor gerichte interventies
   - Precisie ≥ 40% EN Recall ≥ 40%
   - Betrouwbaar voor het identificeren van risicostudenten
-  
+
 - 🟡 **Geel**: Model geeft matig signaal
   - Precisie ≥ 30% EN Recall ≥ 30%
   - Gebruik met voorzichtigheid, aanvullende informatie aanbevolen
-  
+
 - 🔴 **Rood**: Model heeft verbetering nodig
   - Precisie < 30% OF Recall < 30%
   - Niet betrouwbaar voor directe interventies

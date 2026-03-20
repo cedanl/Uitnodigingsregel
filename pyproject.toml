@@ -1,7 +1,7 @@
 [project]
 name = "uitnodigingsregel"
 version = "0.1.0"
-description = "Add your description here"
+description = "Dropout prediction models for student intervention planning"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -13,5 +13,30 @@ dependencies = [
     "pyyaml>=6.0.2",
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.0",
+    "streamlit>=1.40",
     "xlsxwriter>=3.2.2",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.8",
+]
+
+[tool.uv]
+cache-dir = "./.uv_cache"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["N803", "N806"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
