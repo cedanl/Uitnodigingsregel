@@ -68,7 +68,7 @@ from uitnodigingsregel.visualize import (
 warnings.filterwarnings('ignore')
 
 # Load settings explicitly
-settings = load_settings(config_file='config.yaml', settings_type='default')
+settings = load_settings(settings_type='default')
 retrain_models = settings['retrain_models']
 dropout_column = settings['dropout_column']
 random_seed = settings['random_seed']

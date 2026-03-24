@@ -78,8 +78,9 @@ def standardize_dataset(
 
     column_names_train = dataset_train.columns.tolist()
     column_names_pred = dataset_pred.columns.tolist()
-    train_scaled_data = MinMaxScaler().fit_transform(dataset_train)
-    pred_scaled_data = MinMaxScaler().fit_transform(dataset_pred)
+    scaler = MinMaxScaler().fit(dataset_train)
+    train_scaled_data = scaler.transform(dataset_train)
+    pred_scaled_data = scaler.transform(dataset_pred)
     train_df_scaled = pd.DataFrame(train_scaled_data, columns=column_names_train)
     pred_df_scaled = pd.DataFrame(pred_scaled_data, columns=column_names_pred)
 

@@ -63,14 +63,10 @@ def compute_dynamic_evaluation(
     data[col_flag] = np.where((data[dropout_column] == 1) & (data["yhat2_rank"] <= data["i"]), 1, 0)
 
     total_dropout = len(data[data[dropout_column] == 1])
-    for i in range(len(data)):
-        if i < 1:
-            data.loc[i, col_total] = data.loc[i, col_flag]
-        else:
-            data.loc[i, col_total] = data.loc[i, col_flag] + data.loc[i - 1, col_total]
-        data.loc[i, col_precision] = round(data.loc[i, col_total] / data.loc[i, "i"], 2)
-        data.loc[i, col_recall] = round(data.loc[i, col_total] / total_dropout, 2)
-        data.loc[i, "perc_uitgenodigde_studenten"] = round((data.loc[i, "i"] / len(data)) * 100, 1)
+    data[col_total] = data[col_flag].cumsum()
+    data[col_precision] = (data[col_total] / data["i"]).round(2)
+    data[col_recall] = (data[col_total] / total_dropout).round(2)
+    data["perc_uitgenodigde_studenten"] = (data["i"] / len(data) * 100).round(1)
 
     data.drop([col_flag, col_total, "i"], axis=1, inplace=True)
     return data

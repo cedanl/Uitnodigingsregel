@@ -43,9 +43,9 @@ save_method = st.sidebar.selectbox("Opslagformaat", ["xlsx", "csv"])
 st.header("1. Data laden")
 use_demo = st.checkbox("Gebruik synthetische demo-data", value=True)
 
-dropout_col = settings.get("dropout_column", "Dropout")
-studentnr_col = settings.get("studentnumber_column", "Studentnummer")
-separator = settings.get("separator", ";")
+dropout_col = app_config["settings"]["dropout_column"]
+studentnr_col = app_config["settings"]["studentnumber_column"]
+separator = app_config["settings"]["default_separator"]
 
 if use_demo:
     train_path = app_config["paths"]["demo"]["train"]
