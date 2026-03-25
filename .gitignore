@@ -188,3 +188,6 @@ reports/figures/
 
 # Rendered Quarto output
 *.html
+
+# Claude Code
+.claude/
