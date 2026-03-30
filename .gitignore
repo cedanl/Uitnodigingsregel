@@ -170,12 +170,24 @@ cython_debug/
 .Rproj.user
 
 # Pipeline generated output
-data/interim/
-data/processed/
+data/02-prepared/*.csv
+data/02-prepared/*.parquet
+data/03-output/*.csv
+data/03-output/*.parquet
+data/01-raw/user_data/
 models/*.joblib
 models/predictions/
 reports/*.txt
 reports/figures/
 
+# uv cache
+.uv_cache/
+
+# ruff cache
+.ruff_cache/
+
 # Rendered Quarto output
 *.html
+
+# Claude Code
+.claude/

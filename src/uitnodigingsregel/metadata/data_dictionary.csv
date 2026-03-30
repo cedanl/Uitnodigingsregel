@@ -1,0 +1,8 @@
+dataset;column_name;description;type;source;example;allowed_values;sensitive
+ranked_students;ranking;Rangpositie van de student op basis van voorspelde uitvalkans;integer;derived;1;1-N;false
+ranked_students;Studentnummer;Unieke identifier van de student;character;01-raw;STU001;;true
+ranked_students;voorspelling;Voorspelde uitvalkans (hoger = meer risico);double;derived;0.73;0.0-1.0;false
+train_processed;Dropout;Binaire uitvalstatus van de student;integer;01-raw;1;0;1;false
+train_processed;*_nan;Dummy indicator voor ontbrekende waarde in categorische kolom;integer;derived;0;0;1;false
+train_data_standardized;Dropout;Binaire uitvalstatus (ongeschaald);integer;01-raw;1;0;1;false
+train_data_standardized;*;Min-max geschaalde feature waarden;double;derived;0.45;0.0-1.0;false

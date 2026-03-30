@@ -1,14 +1,14 @@
 default_settings:
   retrain_models: True
-  separator: "\t"
+  separator: "\\t"
   dropout_column: 'Dropout'
   studentnumber_column: 'Studentnummer'
   save_method: 'xlsx'
   PROJ_ROOT: '.'
-  synth_data_dir_train: './data/raw/synth_data_train.csv'
-  synth_data_dir_pred: './data/raw/synth_data_pred.csv'
-  user_data_dir_train: './data/raw/user_data/train.csv'
-  user_data_dir_pred: './data/raw/user_data/pred.csv'
+  synth_data_dir_train: './data/01-raw/demo/synth_data_train.csv'
+  synth_data_dir_pred: './data/01-raw/demo/synth_data_pred.csv'
+  user_data_dir_train: './data/01-raw/user_data/train.csv'
+  user_data_dir_pred: './data/01-raw/user_data/pred.csv'
   random_seed: 42
   rf_parameters:
     bootstrap: [true, false]
@@ -25,15 +25,15 @@ default_settings:
 
 custom_settings:
   retrain_models: False
-  separator: ','
+  separator: "\\t"
   dropout_column: 'Dropout'
   studentnumber_column: 'Studentnummer'
   save_method: 'xlsx'
   PROJ_ROOT: '.'
-  synth_data_dir_train: './data/raw/synth_data_train.csv'
-  synth_data_dir_pred: './data/raw/synth_data_pred.csv'
-  user_data_dir_train: './data/raw/user_data/train.csv'
-  user_data_dir_pred: './data/raw/user_data/pred.csv'
+  synth_data_dir_train: './data/01-raw/demo/synth_data_train.csv'
+  synth_data_dir_pred: './data/01-raw/demo/synth_data_pred.csv'
+  user_data_dir_train: './data/01-raw/user_data/train.csv'
+  user_data_dir_pred: './data/01-raw/user_data/pred.csv'
   random_seed: 42
   rf_parameters:
     bootstrap: [true, false]
