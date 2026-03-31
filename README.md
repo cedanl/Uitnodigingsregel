@@ -42,7 +42,7 @@ Wil je de Uitnodigingsregel toepassen binnen jouw onderwijsinstelling? Houd dan 
 ├── reports/                     <- Generated analysis (HTML, figures)
 │   └── figures/
 ├── src/uitnodigingsregel/       <- Installable Python package
-│   ├── dataset.py               <- Data cleaning
+│   ├── dataset.py               <- Data cleaning (deduplication, imputation)
 │   ├── features.py              <- Feature engineering
 │   ├── evaluate.py              <- Model evaluation and settings
 │   ├── visualize.py             <- Plotting functions
