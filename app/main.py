@@ -64,7 +64,7 @@ if st.button("Data laden en pipeline uitvoeren"):
 
             train_clean = train_df.drop_duplicates()
             pred_clean = pred_df.drop_duplicates()
-            train_clean, pred_clean = impute_missing_values(train_clean, pred_clean)
+            train_clean, pred_clean = impute_missing_values(train_clean, pred_clean, n_neighbors=settings["knn_neighbors"])
             train_clean, pred_clean = remove_single_value_columns(train_clean, pred_clean)
             train_proc, pred_proc = convert_categorical_to_dummies(
                 train_clean, pred_clean, dropout_col

@@ -98,7 +98,7 @@ else:
 
 train_cleaned = train_df.drop_duplicates()
 pred_cleaned = train_cleaned.copy()
-train_cleaned, pred_cleaned = impute_missing_values(train_cleaned, pred_cleaned)
+train_cleaned, pred_cleaned = impute_missing_values(train_cleaned, pred_cleaned, n_neighbors=settings['knn_neighbors'])
 train_cleaned, pred_cleaned = remove_single_value_columns(train_cleaned, pred_cleaned)
 train_processed, pred_processed = convert_categorical_to_dummies(train_cleaned, pred_cleaned, dropout_column)
 train_df_sdd, pred_df_sdd = standardize_dataset(train_processed, pred_processed, dropout_column)

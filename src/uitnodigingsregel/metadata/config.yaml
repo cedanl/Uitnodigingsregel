@@ -1,6 +1,7 @@
 default_settings:
   retrain_models: True
   separator: "\\t"
+  knn_neighbors: 5
   dropout_column: 'Dropout'
   studentnumber_column: 'Studentnummer'
   save_method: 'xlsx'
@@ -26,6 +27,7 @@ default_settings:
 custom_settings:
   retrain_models: False
   separator: "\\t"
+  knn_neighbors: 5
   dropout_column: 'Dropout'
   studentnumber_column: 'Studentnummer'
   save_method: 'xlsx'
