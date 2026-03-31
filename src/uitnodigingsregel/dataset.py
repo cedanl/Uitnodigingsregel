@@ -3,21 +3,50 @@
 from pathlib import Path
 
 import pandas as pd
+from sklearn.impute import KNNImputer
 
 
 def clean_data(dataset: pd.DataFrame) -> pd.DataFrame:
-    """Drop duplicate rows and fill NA values with column means for numeric columns.
+    """Drop duplicate rows from a dataset.
 
     Args:
         dataset: Raw input DataFrame.
 
     Returns:
-        Cleaned DataFrame with no duplicates and imputed numeric NAs.
+        DataFrame with duplicate rows removed.
     """
-    dataset_no_dups = dataset.drop_duplicates()
-    numerical_cols = dataset_no_dups.select_dtypes(include=["number"])
-    dataset_no_dups.loc[:, numerical_cols.columns] = numerical_cols.fillna(numerical_cols.mean())
-    return dataset_no_dups
+    return dataset.drop_duplicates()
+
+
+def impute_missing_values(
+    dataset_train: pd.DataFrame,
+    dataset_pred: pd.DataFrame,
+    n_neighbors: int = 5,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Impute missing values using KNN, fitted on train data only.
+
+    Fits a KNNImputer on the training set and applies it to both train and
+    prediction sets, preventing data leakage from pred into train.
+
+    Args:
+        dataset_train: Training DataFrame with possible missing values.
+        dataset_pred: Prediction DataFrame with possible missing values.
+        n_neighbors: Number of neighbors for KNN imputation.
+
+    Returns:
+        Tuple of (train, pred) DataFrames with imputed numeric columns.
+    """
+    numerical_cols = dataset_train.select_dtypes(include=["number"]).columns.tolist()
+
+    imputer = KNNImputer(n_neighbors=n_neighbors)
+    imputer.fit(dataset_train[numerical_cols])
+
+    dataset_train = dataset_train.copy()
+    dataset_pred = dataset_pred.copy()
+    dataset_train[numerical_cols] = imputer.transform(dataset_train[numerical_cols])
+    dataset_pred[numerical_cols] = imputer.transform(dataset_pred[numerical_cols])
+
+    return dataset_train, dataset_pred
 
 
 def remove_single_value_columns(

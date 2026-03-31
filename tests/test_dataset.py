@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from uitnodigingsregel.dataset import clean_data, remove_single_value_columns
+from uitnodigingsregel.dataset import clean_data, impute_missing_values, remove_single_value_columns
 
 
 def test_clean_data_removes_duplicates() -> None:
@@ -12,10 +12,22 @@ def test_clean_data_removes_duplicates() -> None:
     assert len(result) == 2
 
 
-def test_clean_data_fills_missing_numeric() -> None:
-    df = pd.DataFrame({"a": [1.0, np.nan, 3.0], "b": [4.0, 5.0, 6.0]})
-    result = clean_data(df)
-    assert not result["a"].isna().any()
+def test_impute_missing_values_fills_na() -> None:
+    train = pd.DataFrame({"a": [1.0, 2.0, 3.0, 4.0, 5.0], "b": [5.0, 4.0, 3.0, 2.0, 1.0]})
+    pred = pd.DataFrame({"a": [np.nan, 3.0], "b": [5.0, np.nan]})
+    train_out, pred_out = impute_missing_values(train, pred)
+    assert not train_out.isna().any().any()
+    assert not pred_out.isna().any().any()
+
+
+def test_impute_missing_values_fits_on_train_only() -> None:
+    # pred has very different values — imputer must use train distribution, not pred
+    train = pd.DataFrame({"a": [1.0, 2.0, 3.0, 4.0, 5.0], "b": [1.0, 2.0, 3.0, 4.0, 5.0]})
+    pred = pd.DataFrame({"a": [np.nan, 100.0], "b": [100.0, np.nan]})
+    train_out, pred_out = impute_missing_values(train, pred)
+    # imputed values should be close to train range, not pred range
+    assert pred_out["a"].iloc[0] < 10
+    assert pred_out["b"].iloc[1] < 10
 
 
 def test_remove_single_value_columns() -> None:
