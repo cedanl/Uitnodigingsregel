@@ -3,13 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from uitnodigingsregel.dataset import clean_data, impute_missing_values, remove_single_value_columns
-
-
-def test_clean_data_removes_duplicates() -> None:
-    df = pd.DataFrame({"a": [1, 1, 2], "b": [3, 3, 4]})
-    result = clean_data(df)
-    assert len(result) == 2
+from uitnodigingsregel.dataset import impute_missing_values, remove_single_value_columns
 
 
 def test_impute_missing_values_fills_na() -> None:

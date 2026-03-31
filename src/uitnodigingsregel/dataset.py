@@ -6,18 +6,6 @@ import pandas as pd
 from sklearn.impute import KNNImputer
 
 
-def clean_data(dataset: pd.DataFrame) -> pd.DataFrame:
-    """Drop duplicate rows from a dataset.
-
-    Args:
-        dataset: Raw input DataFrame.
-
-    Returns:
-        DataFrame with duplicate rows removed.
-    """
-    return dataset.drop_duplicates()
-
-
 def impute_missing_values(
     dataset_train: pd.DataFrame,
     dataset_pred: pd.DataFrame,

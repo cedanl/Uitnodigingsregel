@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from uitnodigingsregel.dataset import clean_data, remove_single_value_columns
+from uitnodigingsregel.dataset import impute_missing_values, remove_single_value_columns
 from uitnodigingsregel.evaluate import load_settings
 from uitnodigingsregel.features import convert_categorical_to_dummies, standardize_dataset
 from uitnodigingsregel.modeling.predict import (
@@ -62,8 +62,9 @@ if st.button("Data laden en pipeline uitvoeren"):
             train_df = pd.read_csv(train_path, sep=separator, engine="python")
             pred_df = pd.read_csv(pred_path, sep=separator, engine="python")
 
-            train_clean = clean_data(train_df)
-            pred_clean = clean_data(pred_df)
+            train_clean = train_df.drop_duplicates()
+            pred_clean = pred_df.drop_duplicates()
+            train_clean, pred_clean = impute_missing_values(train_clean, pred_clean)
             train_clean, pred_clean = remove_single_value_columns(train_clean, pred_clean)
             train_proc, pred_proc = convert_categorical_to_dummies(
                 train_clean, pred_clean, dropout_col
