@@ -41,6 +41,11 @@ format:
 test:
 	uv run pytest
 
+## Update golden master snapshot fixtures
+.PHONY: update-snapshots
+update-snapshots:
+	uv run python tests/update_snapshots.py
+
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
