@@ -3,16 +3,10 @@
 from pathlib import Path
 
 import pandas as pd
+import student_signal
 
-from uitnodigingsregel.dataset import impute_missing_values, remove_single_value_columns
 from uitnodigingsregel.evaluate import load_settings
-from uitnodigingsregel.features import convert_categorical_to_dummies, standardize_dataset
-from uitnodigingsregel.modeling.predict import (
-    load_models,
-    predict_lasso,
-    predict_random_forest,
-    predict_svm,
-)
+from uitnodigingsregel.modeling.predict import load_models
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
 
@@ -46,37 +40,35 @@ def run_pipeline(
     train_df = pd.read_csv(train_path, sep=separator, engine="python")
     pred_df = pd.read_csv(pred_path, sep=separator, engine="python")
 
-    # Data cleaning
-    train_clean = train_df.drop_duplicates()
-    pred_clean = pred_df.drop_duplicates()
-    train_clean, pred_clean = impute_missing_values(train_clean, pred_clean, n_neighbors=knn_neighbors)
-    train_clean, pred_clean = remove_single_value_columns(train_clean, pred_clean)
+    train_df = train_df.drop_duplicates()
+    pred_df = pred_df.drop_duplicates()
 
-    # Feature engineering
-    train_processed, pred_processed = convert_categorical_to_dummies(
-        train_clean, pred_clean, dropout_column
+    prepared = student_signal.prepare(
+        train_df,
+        pred_df,
+        target_col=dropout_column,
+        id_col=studentnumber_column,
+        config={"imputation": {"n_neighbors": knn_neighbors}},
     )
-    train_sdd, pred_sdd = standardize_dataset(train_processed, pred_processed, dropout_column)
 
-    # Train or load models
     if retrain_models:
         print("Training models on the data...")
         rf_model = train_random_forest(
-            train_processed,
+            prepared.train_df,
             random_seed,
             dropout_column,
             settings["rf_parameters"],
             model_path=models_dir / "random_forest_regressor.joblib",
         )
         lasso_model = train_lasso(
-            train_sdd,
+            prepared.train_df_scaled,
             random_seed,
             dropout_column,
             settings["alpha_range"],
             model_path=models_dir / "lasso_regression.joblib",
         )
         svm_model = train_svm(
-            train_sdd,
+            prepared.train_df_scaled,
             random_seed,
             dropout_column,
             settings["svm_parameters"],
@@ -86,15 +78,9 @@ def run_pipeline(
         print("retrain_models is False in config, loading pre-trained models")
         rf_model, lasso_model, svm_model = load_models(models_dir=models_dir)
 
-    ranked_rf = predict_random_forest(
-        rf_model, pred_processed, dropout_column, studentnumber_column
-    )
-    ranked_lasso = predict_lasso(
-        lasso_model, pred_sdd, pred_processed, dropout_column, studentnumber_column
-    )
-    ranked_svm = predict_svm(
-        svm_model, pred_sdd, pred_processed, dropout_column, studentnumber_column
-    )
+    ranked_rf = student_signal.rank(rf_model, prepared, use_scaled=False)
+    ranked_lasso = student_signal.rank(lasso_model, prepared, use_scaled=True)
+    ranked_svm = student_signal.rank(svm_model, prepared, use_scaled=True)
 
     return ranked_rf, ranked_lasso, ranked_svm
 

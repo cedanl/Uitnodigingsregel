@@ -5,16 +5,10 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import student_signal
 
-from uitnodigingsregel.dataset import impute_missing_values, remove_single_value_columns
 from uitnodigingsregel.evaluate import load_settings
-from uitnodigingsregel.features import convert_categorical_to_dummies, standardize_dataset
-from uitnodigingsregel.modeling.predict import (
-    load_models,
-    predict_lasso,
-    predict_random_forest,
-    predict_svm,
-)
+from uitnodigingsregel.modeling.predict import load_models
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
 
@@ -62,34 +56,34 @@ if st.button("Data laden en pipeline uitvoeren"):
             train_df = pd.read_csv(train_path, sep=separator, engine="python")
             pred_df = pd.read_csv(pred_path, sep=separator, engine="python")
 
-            train_clean = train_df.drop_duplicates()
-            pred_clean = pred_df.drop_duplicates()
-            train_clean, pred_clean = impute_missing_values(train_clean, pred_clean, n_neighbors=settings["knn_neighbors"])
-            train_clean, pred_clean = remove_single_value_columns(train_clean, pred_clean)
-            train_proc, pred_proc = convert_categorical_to_dummies(
-                train_clean, pred_clean, dropout_col
+            prepared = student_signal.prepare(
+                train_df.drop_duplicates(),
+                pred_df.drop_duplicates(),
+                target_col=dropout_col,
+                id_col=studentnr_col,
+                config={"imputation": {"n_neighbors": settings["knn_neighbors"]}},
             )
-            train_sdd, pred_sdd = standardize_dataset(train_proc, pred_proc, dropout_col)
 
         if retrain:
             with st.spinner("Modellen trainen (dit kan even duren)..."):
-                rf_params = settings.get("rf_parameters", {})
-                alpha_range = settings.get("alpha_range", [])
-                svm_params = settings.get("svm_parameters", {})
                 seed = settings.get("random_seed", 42)
-                rf_model = train_random_forest(train_proc, seed, dropout_col, rf_params)
-                lasso_model = train_lasso(train_sdd, seed, dropout_col, alpha_range)
-                svm_model = train_svm(train_sdd, seed, dropout_col, svm_params)
+                rf_model = train_random_forest(
+                    prepared.train_df, seed, dropout_col, settings.get("rf_parameters", {})
+                )
+                lasso_model = train_lasso(
+                    prepared.train_df_scaled, seed, dropout_col, settings.get("alpha_range", [])
+                )
+                svm_model = train_svm(
+                    prepared.train_df_scaled, seed, dropout_col, settings.get("svm_parameters", {})
+                )
             st.success("Modellen getraind!")
         else:
             rf_model, lasso_model, svm_model = load_models()
 
         with st.spinner("Voorspellingen genereren..."):
-            rf_ranked = predict_random_forest(rf_model, pred_proc, dropout_col, studentnr_col)
-            lasso_ranked = predict_lasso(
-                lasso_model, pred_sdd, pred_proc, dropout_col, studentnr_col
-            )
-            svm_ranked = predict_svm(svm_model, pred_sdd, pred_proc, dropout_col, studentnr_col)
+            rf_ranked = student_signal.rank(rf_model, prepared, use_scaled=False)
+            lasso_ranked = student_signal.rank(lasso_model, prepared, use_scaled=True)
+            svm_ranked = student_signal.rank(svm_model, prepared, use_scaled=True)
 
         st.header("2. Resultaten")
         tab_rf, tab_lasso, tab_svm = st.tabs(["Random Forest", "Lasso", "SVM"])

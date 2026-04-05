@@ -14,6 +14,7 @@ dependencies = [
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.0",
     "streamlit>=1.40",
+    "student_signal",
     "xlsxwriter>=3.2.2",
 ]
 
@@ -29,6 +30,9 @@ dev = [
 
 [tool.uv]
 cache-dir = "./.uv_cache"
+
+[tool.uv.sources]
+student_signal = { path = "../student-signal", editable = true }
 
 [tool.ruff]
 line-length = 100
