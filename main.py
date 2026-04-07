@@ -16,28 +16,35 @@ from uitnodigingsregel.modeling.predict import (
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
 
-def main() -> None:
-    settings = load_settings()
+def run_pipeline(
+    train_path: Path | str,
+    pred_path: Path | str,
+    settings: dict,
+    models_dir: Path | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Run the full dropout prediction pipeline and return ranked predictions.
+
+    Args:
+        train_path: Path to the training CSV file.
+        pred_path: Path to the prediction CSV file.
+        settings: Settings dictionary (from load_settings()).
+        models_dir: Directory for saving/loading model files. Defaults to Path("models").
+
+    Returns:
+        Tuple of (ranked_rf, ranked_lasso, ranked_svm) DataFrames.
+    """
+    if models_dir is None:
+        models_dir = Path("models")
 
     separator = settings["separator"]
     dropout_column = settings["dropout_column"]
     studentnumber_column = settings["studentnumber_column"]
-    save_method = settings["save_method"]
     retrain_models = settings["retrain_models"]
     random_seed = settings["random_seed"]
     knn_neighbors = settings["knn_neighbors"]
 
-    # Load data: user data if available, otherwise synthetic demo data
-    user_train = Path(settings["user_data_dir_train"])
-    user_pred = Path(settings["user_data_dir_pred"])
-    if user_train.exists() and user_pred.exists():
-        train_df = pd.read_csv(user_train, sep=separator, engine="python")
-        pred_df = pd.read_csv(user_pred, sep=separator, engine="python")
-        print("User datasets found and loaded")
-    else:
-        train_df = pd.read_csv(settings["synth_data_dir_train"], sep=separator, engine="python")
-        pred_df = pd.read_csv(settings["synth_data_dir_pred"], sep=separator, engine="python")
-        print("Pre-uploaded synthetic datasets found and loaded")
+    train_df = pd.read_csv(train_path, sep=separator, engine="python")
+    pred_df = pd.read_csv(pred_path, sep=separator, engine="python")
 
     # Data cleaning
     train_clean = train_df.drop_duplicates()
@@ -55,15 +62,30 @@ def main() -> None:
     if retrain_models:
         print("Training models on the data...")
         rf_model = train_random_forest(
-            train_processed, random_seed, dropout_column, settings["rf_parameters"]
+            train_processed,
+            random_seed,
+            dropout_column,
+            settings["rf_parameters"],
+            model_path=models_dir / "random_forest_regressor.joblib",
         )
-        lasso_model = train_lasso(train_sdd, random_seed, dropout_column, settings["alpha_range"])
-        svm_model = train_svm(train_sdd, random_seed, dropout_column, settings["svm_parameters"])
+        lasso_model = train_lasso(
+            train_sdd,
+            random_seed,
+            dropout_column,
+            settings["alpha_range"],
+            model_path=models_dir / "lasso_regression.joblib",
+        )
+        svm_model = train_svm(
+            train_sdd,
+            random_seed,
+            dropout_column,
+            settings["svm_parameters"],
+            model_path=models_dir / "support_vector_machine.joblib",
+        )
     else:
         print("retrain_models is False in config, loading pre-trained models")
-        rf_model, lasso_model, svm_model = load_models()
+        rf_model, lasso_model, svm_model = load_models(models_dir=models_dir)
 
-    # Predict
     ranked_rf = predict_random_forest(
         rf_model, pred_processed, dropout_column, studentnumber_column
     )
@@ -74,10 +96,30 @@ def main() -> None:
         svm_model, pred_sdd, pred_processed, dropout_column, studentnumber_column
     )
 
+    return ranked_rf, ranked_lasso, ranked_svm
+
+
+def main() -> None:
+    settings = load_settings()
+
+    # Load data: user data if available, otherwise synthetic demo data
+    user_train = Path(settings["user_data_dir_train"])
+    user_pred = Path(settings["user_data_dir_pred"])
+    if user_train.exists() and user_pred.exists():
+        train_path, pred_path = user_train, user_pred
+        print("User datasets found and loaded")
+    else:
+        train_path = Path(settings["synth_data_dir_train"])
+        pred_path = Path(settings["synth_data_dir_pred"])
+        print("Pre-uploaded synthetic datasets found and loaded")
+
+    ranked_rf, ranked_lasso, ranked_svm = run_pipeline(train_path, pred_path, settings)
+
     # Save output
     predictions_dir = Path("models/predictions")
     predictions_dir.mkdir(parents=True, exist_ok=True)
 
+    save_method = settings["save_method"]
     if save_method == "xlsx":
         with pd.ExcelWriter(
             predictions_dir / "ranked_students.xlsx", engine="xlsxwriter"
