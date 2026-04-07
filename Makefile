@@ -41,10 +41,15 @@ format:
 test:
 	uv run pytest
 
-## Update golden master snapshot fixtures
-.PHONY: update-snapshots
-update-snapshots:
-	uv run python tests/update_snapshots.py
+## Regenerate golden master snapshot fixtures (after a deliberate model change)
+.PHONY: snapshot-update
+snapshot-update:
+	uv run python snapshots/update.py --confirm
+
+## Compare current pipeline output to snapshot fixtures (no pass/fail)
+.PHONY: snapshot-compare
+snapshot-compare:
+	uv run python snapshots/compare.py
 
 #################################################################################
 # PROJECT RULES                                                                 #

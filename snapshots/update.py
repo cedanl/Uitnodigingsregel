@@ -1,23 +1,41 @@
-"""Generate golden master snapshot fixtures for model output tests.
+"""Regenerate golden master snapshot fixtures.
 
-Run this script intentionally when model output is expected to change:
+Run ONLY when model output is intentionally expected to change:
 
-    uv run python tests/update_snapshots.py
+    uv run python snapshots/update.py --confirm
 
-The generated CSV files in tests/fixtures/ should be committed to the repository.
+The generated CSV files in snapshots/fixtures/ should be committed to the
+repository so that snapshots/compare.py can detect future drift.
 """
 
+import argparse
 import sys
 from pathlib import Path
 
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
 REPO_ROOT = Path(__file__).parent.parent
+FIXTURES_DIR = Path(__file__).parent / "fixtures"
 sys.path.insert(0, str(REPO_ROOT))
 
 from uitnodigingsregel.evaluate import load_settings  # noqa: E402
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Regenerate snapshot fixtures.")
+    parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="Required flag — confirms intentional fixture regeneration.",
+    )
+    args = parser.parse_args()
+
+    if not args.confirm:
+        print(
+            "ERROR: Pass --confirm to regenerate snapshots.\n"
+            "This overwrites committed fixtures and should only be done after a "
+            "deliberate model change."
+        )
+        sys.exit(1)
+
     from main import run_pipeline  # noqa: PLC0415
 
     settings = load_settings()
