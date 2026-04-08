@@ -5,11 +5,13 @@ description = "Dropout prediction models for student intervention planning"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "httpx>=0.28.1",
     "joblib>=1.4.2",
     "jupyter>=1.1.1",
     "matplotlib>=3.8.0",
     "numpy>=2.2.2",
     "pandas>=2.2.3",
+    "python-docx>=1.2.0",
     "pyyaml>=6.0.2",
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.0",
