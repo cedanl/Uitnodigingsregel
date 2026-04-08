@@ -43,12 +43,14 @@ import seaborn as sns
 from sklearn import tree
 from sklearn.model_selection import train_test_split
 
+import student_signal
+
 from uitnodigingsregel.analyze import (
     analyze_missing_data,
     display_top_features,
     parse_model_metrics,
 )
-from uitnodigingsregel.dataset import detect_separator, impute_missing_values, remove_single_value_columns
+from uitnodigingsregel.dataset import detect_separator
 from uitnodigingsregel.evaluate import (
     display_model_results,
     generate_stoplight_evaluation,
@@ -57,7 +59,6 @@ from uitnodigingsregel.evaluate import (
     save_model_metrics,
     save_threshold_analysis,
 )
-from uitnodigingsregel.features import convert_categorical_to_dummies, standardize_dataset
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 from uitnodigingsregel.visualize import (
     generate_precision_plot,
@@ -96,12 +97,16 @@ else:
     train_df = pd.read_csv(synth_train_path, sep=train_sep, engine='python')
     data_type = "synthetische"
 
-train_cleaned = train_df.drop_duplicates()
-pred_cleaned = train_cleaned.copy()
-train_cleaned, pred_cleaned = impute_missing_values(train_cleaned, pred_cleaned, n_neighbors=settings['knn_neighbors'])
-train_cleaned, pred_cleaned = remove_single_value_columns(train_cleaned, pred_cleaned)
-train_processed, pred_processed = convert_categorical_to_dummies(train_cleaned, pred_cleaned, dropout_column)
-train_df_sdd, pred_df_sdd = standardize_dataset(train_processed, pred_processed, dropout_column)
+train_clean = train_df.drop_duplicates()
+prepared = student_signal.prepare(
+    train_clean,
+    train_clean.copy(),
+    target_col=dropout_column,
+    id_col=settings['studentnumber_column'],
+    config={"imputation": {"n_neighbors": settings['knn_neighbors']}},
+)
+train_processed = prepared.train_df
+train_df_sdd = prepared.train_df_scaled
 
 print(f"Opmerking: Deze analyse is uitgevoerd op {data_type} data.")
 ```
