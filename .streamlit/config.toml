@@ -1,8 +1,24 @@
-[theme]
-primaryColor = "#1f77b4"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f0f2f6"
-textColor = "#262730"
+[global]
+showWarningOnDirectExecution = false
+
+[logger]
+level = "info"
+
+[client]
+showErrorDetails = false
+toolbarMode = "minimal"
 
 [server]
 headless = true
+runOnSave = true
+enableCORS = true
+maxUploadSize = 1500
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+backgroundColor = "#ffffff"
+textColor = "#000000"
+font = "sans serif"
