@@ -1,6 +1,5 @@
 """Streamlit app for Uitnodigingsregel dropout prediction."""
 
-import tomllib
 from pathlib import Path
 
 import pandas as pd
@@ -12,13 +11,6 @@ from uitnodigingsregel.modeling.predict import load_models
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
 
-def load_app_config() -> dict:
-    """Load app-specific TOML configuration."""
-    with open(Path(__file__).parent / "config.toml", "rb") as f:
-        return tomllib.load(f)
-
-
-app_config = load_app_config()
 settings = load_settings()
 
 st.set_page_config(page_title="Uitnodigingsregel", page_icon="🎓", layout="wide")
@@ -37,16 +29,16 @@ save_method = st.sidebar.selectbox("Opslagformaat", ["xlsx", "csv"])
 st.header("1. Data laden")
 use_demo = st.checkbox("Gebruik synthetische demo-data", value=True)
 
-dropout_col = app_config["settings"]["dropout_column"]
-studentnr_col = app_config["settings"]["studentnumber_column"]
-separator = app_config["settings"]["default_separator"]
+dropout_col = settings["dropout_column"]
+studentnr_col = settings["studentnumber_column"]
+separator = settings["separator"]
 
 if use_demo:
-    train_path = app_config["paths"]["demo"]["train"]
-    pred_path = app_config["paths"]["demo"]["pred"]
+    train_path = settings["synth_data_dir_train"]
+    pred_path = settings["synth_data_dir_pred"]
 else:
-    train_path = app_config["paths"]["user_data"]["train"]
-    pred_path = app_config["paths"]["user_data"]["pred"]
+    train_path = settings["user_data_dir_train"]
+    pred_path = settings["user_data_dir_pred"]
 
 if st.button("Data laden en pipeline uitvoeren"):
     if not Path(train_path).exists() or not Path(pred_path).exists():
