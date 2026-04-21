@@ -19,7 +19,7 @@ START_CSS = """
 [data-testid="stApp"] { background-color: #f0d4d4; font-family: 'General Sans', sans-serif; font-weight: 500; }
 [data-testid="stSidebarCollapsedControl"] { display: none; }
 [data-testid="stHeader"] { background-color: #f0d4d4 !important; }
-.block-container { padding-top: 0rem; padding-bottom: 2rem; }
+.block-container { padding-top: 2rem; padding-bottom: 2rem; }
 
 /* ── Bestand uploaden ── */
 [data-testid="stFileUploader"] {
