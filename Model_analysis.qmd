@@ -86,7 +86,7 @@ sns.set_style("whitegrid")
 sns.set_context("notebook", font_scale=1.2)
 
 # Data loading: use user data if present, otherwise use synthetic data (training data only)
-user_train_path = Path(settings.get('user_data_dir_train', './data/01-raw/user_data/train.csv'))
+user_train_path = Path(settings['user_data_dir_train'])
 if user_train_path.exists():
     train_sep = detect_separator(user_train_path, dropout_column)
     train_df = pd.read_csv(user_train_path, sep=train_sep, engine='python')
