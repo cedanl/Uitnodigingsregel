@@ -2,6 +2,8 @@
 
 import io
 import os
+import shutil
+import subprocess
 from pathlib import Path
 
 import httpx
@@ -9,13 +11,13 @@ import pandas as pd
 import streamlit as st
 import student_signal
 from docx import Document
+from styles import MAIN_CSS, START_CSS
 
 from uitnodigingsregel.evaluate import load_settings
 from uitnodigingsregel.modeling.predict import load_models
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
-from styles import MAIN_CSS, START_CSS
-
+ROOT_DIR = Path(__file__).parent.parent
 settings = load_settings()
 
 EDUPLAN_BACKEND_URL = os.getenv("EDUPLAN_BACKEND_URL", "").rstrip("/")
@@ -35,6 +37,8 @@ if "models" not in st.session_state:
     st.session_state.models = None
 if "ranked" not in st.session_state:
     st.session_state.ranked = None
+if "rapport_bytes" not in st.session_state:
+    st.session_state.rapport_bytes = None
 
 
 # ─────────────────────────────────────────────
@@ -237,6 +241,7 @@ def show_main_screen() -> None:
             st.session_state.prepared = None
             st.session_state.models = None
             st.session_state.ranked = None
+            st.session_state.rapport_bytes = None
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -256,12 +261,6 @@ def show_main_screen() -> None:
                 on_select="rerun",
                 selection_mode="single-row",
             )
-            st.download_button(
-                "Download RF resultaten",
-                data=ranked["rf"].to_csv(index=False).encode("utf-8"),
-                file_name="resultaten_rf.csv",
-                mime="text/csv",
-            )
 
         if EDUPLAN_ENABLED and event.selection.rows:
             idx = event.selection.rows[0]
@@ -278,37 +277,76 @@ def show_main_screen() -> None:
         with st.container(border=True):
             st.markdown("**Lasso** — rangschikking op uitvalrisico")
             st.dataframe(ranked["lasso"], use_container_width=True)
-            st.download_button(
-                "Download Lasso resultaten",
-                data=ranked["lasso"].to_csv(index=False).encode("utf-8"),
-                file_name="resultaten_lasso.csv",
-                mime="text/csv",
-            )
 
     # ── SVM ──
     with tab_svm:
         with st.container(border=True):
             st.markdown("**SVM** — rangschikking op uitvalrisico")
             st.dataframe(ranked["svm"], use_container_width=True)
-            st.download_button(
-                "Download SVM resultaten",
-                data=ranked["svm"].to_csv(index=False).encode("utf-8"),
-                file_name="resultaten_svm.csv",
-                mime="text/csv",
-            )
 
-    # ── Model_analysis download ──
-    html_path = Path("Model_analysis.html")
-    if html_path.exists():
-        st.divider()
+    # ── Downloads ──
+    st.divider()
+    st.markdown("#### Downloads")
+
+    dl_col1, dl_col2, dl_col3 = st.columns(3)
+    with dl_col1:
         st.download_button(
-            "Download Model Analyse (HTML → print naar PDF)",
-            data=html_path.read_bytes(),
-            file_name="Model_analysis.html",
-            mime="text/html",
+            "↓ Random Forest resultaten",
+            data=ranked["rf"].to_csv(index=False).encode("utf-8"),
+            file_name="resultaten_rf.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    with dl_col2:
+        st.download_button(
+            "↓ Lasso resultaten",
+            data=ranked["lasso"].to_csv(index=False).encode("utf-8"),
+            file_name="resultaten_lasso.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    with dl_col3:
+        st.download_button(
+            "↓ SVM resultaten",
+            data=ranked["svm"].to_csv(index=False).encode("utf-8"),
+            file_name="resultaten_svm.csv",
+            mime="text/csv",
+            use_container_width=True,
         )
 
-    st.success("Pipeline voltooid!")
+    # ── Quarto rapport ──
+    st.divider()
+    st.markdown("#### Model Analyse rapport")
+
+    quarto_bin = shutil.which("quarto")
+    if quarto_bin is None:
+        st.warning("Quarto niet gevonden — rapport kan niet gegenereerd worden.")
+    else:
+        if st.button("Genereer rapport", type="primary"):
+            with st.spinner("Rapport genereren (~30 seconden)..."):
+                result = subprocess.run(
+                    [quarto_bin, "render", "Model_analysis.qmd"],
+                    cwd=ROOT_DIR,
+                    capture_output=True,
+                    text=True,
+                )
+            if result.returncode == 0:
+                html_path = ROOT_DIR / "reports" / "Model_analysis.html"
+                if html_path.exists():
+                    st.session_state.rapport_bytes = html_path.read_bytes()
+                else:
+                    st.error("Render geslaagd maar HTML niet gevonden.")
+            else:
+                st.error(f"Render mislukt:\n{result.stderr[-500:]}")
+
+        if st.session_state.rapport_bytes:
+            st.download_button(
+                "↓ Download rapport (HTML)",
+                data=st.session_state.rapport_bytes,
+                file_name="Model_analysis.html",
+                mime="text/html",
+                use_container_width=True,
+            )
 
 
 # ─────────────────────────────────────────────
