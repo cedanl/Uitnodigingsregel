@@ -319,6 +319,11 @@ def show_main_screen() -> None:
     st.markdown("#### Model Analyse rapport")
 
     quarto_bin = shutil.which("quarto")
+    html_path = ROOT_DIR / "Model_analysis.html"
+
+    if st.session_state.rapport_bytes is None and html_path.exists():
+        st.session_state.rapport_bytes = html_path.read_bytes()
+
     if quarto_bin is None:
         st.warning("Quarto niet gevonden — rapport kan niet gegenereerd worden.")
     else:
@@ -331,7 +336,6 @@ def show_main_screen() -> None:
                     text=True,
                 )
             if result.returncode == 0:
-                html_path = ROOT_DIR / "Model_analysis.html"
                 if html_path.exists():
                     st.session_state.rapport_bytes = html_path.read_bytes()
                 else:
@@ -339,14 +343,14 @@ def show_main_screen() -> None:
             else:
                 st.error(f"Render mislukt:\n{result.stderr[-500:]}")
 
-        if st.session_state.rapport_bytes:
-            st.download_button(
-                "↓ Download rapport (HTML)",
-                data=st.session_state.rapport_bytes,
-                file_name="Model_analysis.html",
-                mime="text/html",
-                use_container_width=True,
-            )
+    if st.session_state.rapport_bytes:
+        st.download_button(
+            "↓ Download rapport (HTML)",
+            data=st.session_state.rapport_bytes,
+            file_name="Model_analysis.html",
+            mime="text/html",
+            use_container_width=True,
+        )
 
 
 # ─────────────────────────────────────────────
