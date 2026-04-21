@@ -34,7 +34,6 @@ dev = [
 cache-dir = "./.uv_cache"
 
 [tool.uv.sources]
-student_signal = { path = "../student-signal", editable = true }
 
 [tool.ruff]
 line-length = 100

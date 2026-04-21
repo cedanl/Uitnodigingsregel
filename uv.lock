@@ -1811,7 +1811,7 @@ wheels = [
 [[package]]
 name = "student-signal"
 version = "0.1.0"
-source = { editable = "../student-signal" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "joblib" },
     { name = "matplotlib" },
@@ -1820,24 +1820,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "scikit-learn" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "joblib", specifier = ">=1.4.2" },
-    { name = "matplotlib", specifier = ">=3.8.0" },
-    { name = "numpy", specifier = ">=2.2.2" },
-    { name = "pandas", specifier = ">=2.2.3" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
-    { name = "scikit-learn", specifier = ">=1.6.1" },
-]
-provides-extras = ["dev"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=9.0.2" },
-    { name = "ruff", specifier = ">=0.15.6" },
+sdist = { url = "https://files.pythonhosted.org/packages/31/26/eca5fec77272ec2897540a320195fdfc94b4e145b1b8150fb3aefc166740/student_signal-0.1.0.tar.gz", hash = "sha256:8155eef570581291e4745b747842e49d7488d7ad9f4b15c6e19667452d08ec1f", size = 61576, upload-time = "2026-04-13T15:08:41.164Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/db/2a3b93c28316f62f6af17e7f965bd211099029d208c5258cce16ffb6bd87/student_signal-0.1.0-py3-none-any.whl", hash = "sha256:ce5e9afaec54df86558afbb386520e5ff9fe8c3a3a5bf0af3f9a8b228d6dad76", size = 23159, upload-time = "2026-04-13T15:08:39.92Z" },
 ]
 
 [[package]]
@@ -1994,7 +1979,7 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.6.1" },
     { name = "seaborn", specifier = ">=0.13.0" },
     { name = "streamlit", specifier = ">=1.40" },
-    { name = "student-signal", editable = "../student-signal" },
+    { name = "student-signal" },
     { name = "xlsxwriter", specifier = ">=3.2.2" },
 ]
 provides-extras = ["dev"]
