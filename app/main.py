@@ -331,7 +331,7 @@ def show_main_screen() -> None:
                     text=True,
                 )
             if result.returncode == 0:
-                html_path = ROOT_DIR / "reports" / "Model_analysis.html"
+                html_path = ROOT_DIR / "Model_analysis.html"
                 if html_path.exists():
                     st.session_state.rapport_bytes = html_path.read_bytes()
                 else:
