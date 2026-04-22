@@ -263,6 +263,49 @@ def show_main_screen() -> None:
     prepared = st.session_state.prepared
     studentnr_col = settings["studentnumber_column"]
 
+    # ── Quarto rapport ──
+    quarto_bin = shutil.which("quarto")
+    html_path = ROOT_DIR / "Model_analysis.html"
+
+    if st.session_state.rapport_bytes is None and html_path.exists():
+        st.session_state.rapport_bytes = html_path.read_bytes()
+
+    st.markdown("#### Modelkwaliteit & Toelichting")
+    st.caption(
+        "Bekijk hoe goed het model presteert op jouw data en welke factoren uitval "
+        "voorspellen — en beoordeel of inzet verantwoord is."
+    )
+
+    if quarto_bin is None:
+        st.warning("Quarto niet gevonden — rapport kan niet gegenereerd worden.")
+    else:
+        if st.button("Genereer rapport", type="primary"):
+            with st.spinner("Rapport genereren (~30 seconden)..."):
+                result = subprocess.run(
+                    [quarto_bin, "render", "Model_analysis.qmd"],
+                    cwd=ROOT_DIR,
+                    capture_output=True,
+                    text=True,
+                )
+            if result.returncode == 0:
+                if html_path.exists():
+                    st.session_state.rapport_bytes = html_path.read_bytes()
+                else:
+                    st.error("Render geslaagd maar HTML niet gevonden.")
+            else:
+                st.error(f"Render mislukt:\n{result.stderr[-500:]}")
+
+    if st.session_state.rapport_bytes:
+        st.download_button(
+            "↓ Download rapport (HTML)",
+            data=st.session_state.rapport_bytes,
+            file_name="Modelkwaliteit_toelichting.html",
+            mime="text/html",
+            use_container_width=True,
+        )
+
+    st.divider()
+    st.markdown("#### Resultaten")
     tab_rf, tab_lasso, tab_svm = st.tabs(["Random Forest", "Lasso", "SVM"])
 
     # ── Random Forest — met EduPlan ──
@@ -297,48 +340,6 @@ def show_main_screen() -> None:
         with st.container(border=True):
             st.markdown("**SVM** — rangschikking op uitvalrisico")
             st.dataframe(ranked["svm"], use_container_width=True)
-
-    # ── Quarto rapport ──
-    st.divider()
-    st.markdown("#### Modelkwaliteit & Toelichting")
-    st.caption(
-        "Bekijk hoe goed het model presteert op jouw data en welke factoren uitval "
-        "voorspellen — en beoordeel of inzet verantwoord is."
-    )
-
-    quarto_bin = shutil.which("quarto")
-    html_path = ROOT_DIR / "Model_analysis.html"
-
-    if st.session_state.rapport_bytes is None and html_path.exists():
-        st.session_state.rapport_bytes = html_path.read_bytes()
-
-    if quarto_bin is None:
-        st.warning("Quarto niet gevonden — rapport kan niet gegenereerd worden.")
-    else:
-        if st.button("Genereer rapport", type="primary"):
-            with st.spinner("Rapport genereren (~30 seconden)..."):
-                result = subprocess.run(
-                    [quarto_bin, "render", "Model_analysis.qmd"],
-                    cwd=ROOT_DIR,
-                    capture_output=True,
-                    text=True,
-                )
-            if result.returncode == 0:
-                if html_path.exists():
-                    st.session_state.rapport_bytes = html_path.read_bytes()
-                else:
-                    st.error("Render geslaagd maar HTML niet gevonden.")
-            else:
-                st.error(f"Render mislukt:\n{result.stderr[-500:]}")
-
-    if st.session_state.rapport_bytes:
-        st.download_button(
-            "↓ Download rapport (HTML)",
-            data=st.session_state.rapport_bytes,
-            file_name="Modelkwaliteit_toelichting.html",
-            mime="text/html",
-            use_container_width=True,
-        )
 
     # ── Downloads ──
     st.divider()
