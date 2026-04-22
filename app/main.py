@@ -142,13 +142,15 @@ def show_start_screen() -> None:
     st.markdown(START_CSS, unsafe_allow_html=True)
 
     st.markdown("# Uitnodigingsregel")
+    st.markdown("*op tijd de juiste studenten uitnodigen*")
     st.markdown(
-        "Genereer dropout-voorspellingen en rangschik studenten op risico. "
-        "Gebruik synthetische demo-data of upload eigen CSV-bestanden."
+        "Voeg je eigen dataset met studenten toe, om te zien of er nú studenten zijn "
+        "die mogelijk risico lopen om uit te vallen. We brengen ze voor jou in beeld."
     )
 
     st.markdown("---")
 
+    st.caption("Upload een databestand of selecteer de synthetische demo-data om te starten.")
     use_demo = st.checkbox("Gebruik synthetische demo-data", value=True)
 
     train_file = None
