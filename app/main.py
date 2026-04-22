@@ -298,39 +298,13 @@ def show_main_screen() -> None:
             st.markdown("**SVM** — rangschikking op uitvalrisico")
             st.dataframe(ranked["svm"], use_container_width=True)
 
-    # ── Downloads ──
-    st.divider()
-    st.markdown("#### Downloads")
-
-    dl_col1, dl_col2, dl_col3 = st.columns(3)
-    with dl_col1:
-        st.download_button(
-            "↓ Random Forest resultaten",
-            data=ranked["rf"].to_csv(index=False).encode("utf-8"),
-            file_name="resultaten_rf.csv",
-            mime="text/csv",
-            use_container_width=True,
-        )
-    with dl_col2:
-        st.download_button(
-            "↓ Lasso resultaten",
-            data=ranked["lasso"].to_csv(index=False).encode("utf-8"),
-            file_name="resultaten_lasso.csv",
-            mime="text/csv",
-            use_container_width=True,
-        )
-    with dl_col3:
-        st.download_button(
-            "↓ SVM resultaten",
-            data=ranked["svm"].to_csv(index=False).encode("utf-8"),
-            file_name="resultaten_svm.csv",
-            mime="text/csv",
-            use_container_width=True,
-        )
-
     # ── Quarto rapport ──
     st.divider()
-    st.markdown("#### Model Analyse rapport")
+    st.markdown("#### Modelkwaliteit & Toelichting")
+    st.caption(
+        "Bekijk hoe goed het model presteert op jouw data en welke factoren uitval "
+        "voorspellen — en beoordeel of inzet verantwoord is."
+    )
 
     quarto_bin = shutil.which("quarto")
     html_path = ROOT_DIR / "Model_analysis.html"
@@ -361,8 +335,38 @@ def show_main_screen() -> None:
         st.download_button(
             "↓ Download rapport (HTML)",
             data=st.session_state.rapport_bytes,
-            file_name="Model_analysis.html",
+            file_name="Modelkwaliteit_toelichting.html",
             mime="text/html",
+            use_container_width=True,
+        )
+
+    # ── Downloads ──
+    st.divider()
+    st.markdown("#### Downloads")
+
+    dl_col1, dl_col2, dl_col3 = st.columns(3)
+    with dl_col1:
+        st.download_button(
+            "↓ Random Forest resultaten",
+            data=ranked["rf"].to_csv(index=False).encode("utf-8"),
+            file_name="resultaten_rf.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    with dl_col2:
+        st.download_button(
+            "↓ Lasso resultaten",
+            data=ranked["lasso"].to_csv(index=False).encode("utf-8"),
+            file_name="resultaten_lasso.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+    with dl_col3:
+        st.download_button(
+            "↓ SVM resultaten",
+            data=ranked["svm"].to_csv(index=False).encode("utf-8"),
+            file_name="resultaten_svm.csv",
+            mime="text/csv",
             use_container_width=True,
         )
 
