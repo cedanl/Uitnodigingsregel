@@ -149,20 +149,6 @@ def show_start_screen() -> None:
 
     st.markdown("---")
 
-    st.markdown("#### Zo gebruiken we De Uitnodigingsregel")
-    st.markdown(
-        "We zetten De Uitnodigingsregel in als ondersteuning van studentbegeleiding, "
-        "niet als oordeel over studenten. Het model herkent patronen en geeft een signaal "
-        "over kans op uitval — een kans is geen garantie en zegt niets over oorzaak. "
-        "De mens beslist, altijd.\n\n"
-        "Uitkomsten delen we alleen met direct betrokken begeleiders en communiceren we "
-        "zorgvuldig en positief richting de student. We gebruiken het model nooit voor "
-        "selectie aan de poort, uitsluiting of geautomatiseerde beslissingen."
-    )
-    agreed = st.checkbox("Ik werk volgens deze uitgangspunten.")
-
-    st.markdown("---")
-
     use_demo = st.checkbox("Gebruik synthetische demo-data", value=True)
 
     train_file = None
@@ -175,6 +161,20 @@ def show_start_screen() -> None:
             pred_file = st.file_uploader("Predictiedata (CSV)", type=["csv"])
 
     retrain = st.checkbox("Modellen opnieuw trainen", value=False)
+
+    st.markdown("---")
+
+    st.markdown("#### Zo gebruiken we De Uitnodigingsregel")
+    st.markdown(
+        "We zetten De Uitnodigingsregel in als ondersteuning van studentbegeleiding, "
+        "niet als oordeel over studenten. Het model herkent patronen en geeft een signaal "
+        "over kans op uitval — een kans is geen garantie en zegt niets over oorzaak. "
+        "De mens beslist, altijd.\n\n"
+        "Uitkomsten delen we alleen met direct betrokken begeleiders en communiceren we "
+        "zorgvuldig en positief richting de student. We gebruiken het model nooit voor "
+        "selectie aan de poort, uitsluiting of geautomatiseerde beslissingen."
+    )
+    agreed = st.checkbox("Ik werk volgens deze uitgangspunten.")
 
     ready = agreed and (use_demo or (train_file is not None and pred_file is not None))
 
