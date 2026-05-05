@@ -1,4 +1,6 @@
-Studenten uitval voorspellen
+# Uitnodigingsregel
+
+Python implementatie van de Uitnodigingsregel — een machine learning model dat studenten met een verhoogd uitvalrisico signaleert. Bedoeld voor data scientists en developers die het model opzetten en beheren binnen hun onderwijsinstelling.
 
 # Waarom de Uitnodigingsregel
 Onderwijsinstellingen worstelen al jaren om meer grip op uitval te krijgen. Steeds vaker wordt hierbij gebruikgemaakt van data over de studieontwikkeling van studenten.
@@ -20,44 +22,15 @@ Meer informatie over het voorkomen van studentenuitval door middel van verklarin
 Wil je de Uitnodigingsregel toepassen binnen jouw onderwijsinstelling? Houd dan rekening met een uitgebreide voorbereiding, waaronder een DPIA (Data Protection Impact Assessment) maar ook ethische toetsing en toetsing aan de AI-verordening. De Datacoalitie Datagedreven Onderzoek heeft deze methodiek zorgvuldig naar de praktijk vertaald. Lees [hier meer](https://datagedrevenonderzoekmbo.nl/themas/voorspelmodel) over dit proces en bekijk de [ontwikkelde producten](https://datagedrevenonderzoekmbo.nl/themas/voorspelmodel/praktijkpilot-de-uitnodigingsregel) die kunnen helpen bij een succesvolle implementatie van de Uitnodigingsregel.
 
 
-# Student dropout model
+# Aan de slag
 
-## Project Structure
+Volledige documentatie, pipeline-overzicht en projectstructuur: **[cedanl.github.io/Uitnodigingsregel](https://cedanl.github.io/Uitnodigingsregel/)**
 
-```
-├── LICENSE
-├── Makefile                     <- Convenience commands
-├── README.md
-├── main.py                      <- Pipeline entrypoint
-├── Model_analysis.qmd           <- Quarto analysis report
-├── config.yaml                  <- Root configuration
-├── data/
-│   ├── 01-raw/                  <- Original, immutable data
-│   │   ├── demo/                <- Synthetic demo data (committed)
-│   │   └── user_data/           <- User-provided data (gitignored)
-│   ├── 02-prepared/             <- Standardized intermediate data
-│   └── 03-output/               <- Processed datasets
-├── models/                      <- Trained models (.joblib) and predictions
-│   └── predictions/             <- Output files
-├── reports/                     <- Generated analysis (HTML, figures)
-│   └── figures/
-├── src/uitnodigingsregel/       <- Installable Python package
-│   ├── dataset.py               <- Data cleaning (deduplication, imputation)
-│   ├── features.py              <- Feature engineering
-│   ├── evaluate.py              <- Model evaluation and settings
-│   ├── visualize.py             <- Plotting functions
-│   ├── analyze.py               <- Analysis helpers
-│   ├── modeling/
-│   │   ├── train.py             <- Model training (RF, Lasso, SVM)
-│   │   └── predict.py           <- Model prediction
-│   └── metadata/
-│       └── config.yaml          <- Hyperparameters and settings
-├── app/                         <- Streamlit interactive app
-│   ├── main.py
-│   └── config.toml
-├── tests/                       <- Unit tests
-└── pyproject.toml               <- Project configuration
-```
+## Datavoorbereiding
+
+De invoerdata wordt voorbereid via de [Uitnodigingsregel_datapreparatie](https://github.com/cedanl/Uitnodigingsregel_datapreparatie) repo. Zorg dat de voorbereide data aanwezig is in `data/02-prepared/` voordat je de pipeline draait.
+
+Een overzicht van alle variabelen staat in de [data dictionary](docs/Variabelen_Definities_v4.xlsx).
 
 ## Prerequisites
 If you do not have a Python environment set up, follow these steps:
