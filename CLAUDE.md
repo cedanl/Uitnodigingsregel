@@ -16,6 +16,7 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 ## Project Structure
 ```
 ├── src/uitnodigingsregel/       # Installable package
+│   ├── cli.py                   # CLI entrypoint (uitnodigingsregel command)
 │   ├── dataset.py               # Data cleaning (clean_data, remove_single_value_columns)
 │   ├── features.py              # Feature engineering (convert_categorical_to_dummies, standardize_dataset)
 │   ├── evaluate.py              # Model evaluation (load_settings, prepare_model_predictions, etc.)
@@ -24,11 +25,11 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 │   ├── modeling/
 │   │   ├── train.py             # Model training (train_random_forest, train_lasso, train_svm)
 │   │   └── predict.py           # Model prediction (predict_random_forest, predict_lasso, predict_svm)
+│   ├── app/                     # Streamlit app (installed as package data)
+│   │   ├── main.py              # App entrypoint
+│   │   └── styles.py            # CSS en kleurconstanten
 │   └── metadata/
 │       └── config.yaml          # Model hyperparameters and settings
-├── app/                         # Streamlit app (thin wrapper)
-│   ├── main.py
-│   └── config.toml              # Data paths
 ├── data/
 │   ├── 01-raw/                  # Input data
 │   │   ├── demo/                # Synthetic data (committed)
@@ -47,9 +48,9 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 ```bash
 uv sync                              # Install dependencies
 uv run python main.py                # Run full pipeline
-uv run streamlit run app/main.py     # Launch interactive app
+uv run uitnodigingsregel             # Launch interactive app (CLI)
 quarto render Model_analysis.qmd     # Render analysis report
-uv run ruff check src app            # Lint
+uv run ruff check src                # Lint
 uv run pytest                        # Test
 ```
 
