@@ -87,10 +87,11 @@ After execution, the generated prediction files will be saved in `models/predict
 ## Contributors
 Thank you to all the people who have already contributed to Uitnodigingsregel [[contributors](https://github.com/cedanl/Uitnodigingsregel/graphs/contributors)].
 
-[![](https://github.com/tin900.png?size=50)](https://github.com/tin900)
-[![](https://github.com/MondriaanBI.png?size=50)](https://github.com/MondriaanBI)
-[![](https://github.com/asewnandan.png?size=50)](https://github.com/asewnandan)
-[![](https://github.com/StevenRamondt.png?size=50)](https://github.com/StevenRamondt)
+<a href="https://github.com/tin900"><img src="https://github.com/tin900.png" width="50" height="50" alt="tin900"></a>
+<a href="https://github.com/MondriaanBI"><img src="https://github.com/MondriaanBI.png" width="50" height="50" alt="MondriaanBI"></a>
+<a href="https://github.com/asewnandan"><img src="https://github.com/asewnandan.png" width="50" height="50" alt="asewnandan"></a>
+<a href="https://github.com/StevenRamondt"><img src="https://github.com/StevenRamondt.png" width="50" height="50" alt="StevenRamondt"></a>
+
 
 ## Credits
 This product was originally created with [Cookiecutter Data Science](https://github.com/drivendataorg/cookiecutter-data-science) and migrated to the [CEDA package standard](https://github.com/cedanl/.github/tree/main/standards).
