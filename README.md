@@ -28,7 +28,7 @@ Volledige documentatie, pipeline-overzicht en projectstructuur: **[cedanl.github
 
 ## Datavoorbereiding
 
-SQL-voorbeeldcode voor de invoerdata wisbeschikbaar via de [Uitnodigingsregel_datapreparatie](https://github.com/cedanl/Uitnodigingsregel_datapreparatie) repo. Zorg dat de voorbereide data aanwezig is in `data/02-prepared/` voordat je de pipeline draait. Of gebruik de synthetische demo-data.
+SQL-voorbeeldcode voor de invoerdata is beschikbaar via de [Uitnodigingsregel_datapreparatie](https://github.com/cedanl/Uitnodigingsregel_datapreparatie) repo. Zorg dat de voorbereide data aanwezig is in `data/02-prepared/` voordat je de pipeline draait. Of gebruik de synthetische demo-data.
 
 Een overzicht van alle variabelen staat in de [data dictionary](docs/Variabelen_Definities_v4.xlsx).
 
