@@ -11,13 +11,13 @@ import pandas as pd
 import streamlit as st
 import student_signal
 from docx import Document
-from styles import MAIN_CSS, START_CSS
 
+from uitnodigingsregel.app.styles import MAIN_CSS, START_CSS
 from uitnodigingsregel.evaluate import load_settings
 from uitnodigingsregel.modeling.predict import load_models
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
-ROOT_DIR = Path(__file__).parent.parent
+ROOT_DIR = Path.cwd()
 settings = load_settings()
 
 EDUPLAN_BACKEND_URL = os.getenv("EDUPLAN_BACKEND_URL", "").rstrip("/")
@@ -44,6 +44,7 @@ if "rapport_bytes" not in st.session_state:
 # ─────────────────────────────────────────────
 # EduPlan helpers
 # ─────────────────────────────────────────────
+
 
 def haal_eduplan_op(student_data: dict, probability: float) -> dict | None:
     try:
@@ -87,7 +88,9 @@ def bouw_word_doc(student_id: str, probability: float, explanation: str, shap: d
     top_shap = sorted(shap.items(), key=lambda x: abs(x[1]), reverse=True)[:5]
     for feature, waarde in top_shap:
         richting = "verhoogt" if waarde > 0 else "verlaagt"
-        doc.add_paragraph(f"{feature}: {richting} uitvalrisico ({waarde:+.3f})", style="List Bullet")
+        doc.add_paragraph(
+            f"{feature}: {richting} uitvalrisico ({waarde:+.3f})", style="List Bullet"
+        )
     doc.add_heading("EduPlan", level=2)
     doc.add_paragraph(explanation)
     buf = io.BytesIO()
@@ -109,7 +112,8 @@ def toon_eduplan(student_id: str, student_data: dict, probability: float) -> Non
     with st.container(border=True):
         st.markdown(
             f"<h4>EduPlan — {student_id} "
-            f"<span style='color:{kleur};font-weight:700'>{niveau} RISICO ({probability:.0%})</span></h4>",
+            f"<span style='color:{kleur};font-weight:700'>"
+            f"{niveau} RISICO ({probability:.0%})</span></h4>",
             unsafe_allow_html=True,
         )
 
@@ -137,6 +141,7 @@ def toon_eduplan(student_id: str, student_data: dict, probability: float) -> Non
 # ─────────────────────────────────────────────
 # Start screen
 # ─────────────────────────────────────────────
+
 
 def show_start_screen() -> None:
     st.markdown(START_CSS, unsafe_allow_html=True)
@@ -243,6 +248,7 @@ def show_start_screen() -> None:
 # ─────────────────────────────────────────────
 # Main screen
 # ─────────────────────────────────────────────
+
 
 def show_main_screen() -> None:
     st.markdown(MAIN_CSS, unsafe_allow_html=True)

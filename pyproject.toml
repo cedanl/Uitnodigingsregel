@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "Dropout prediction models for student intervention planning"
 readme = "README.md"
 requires-python = ">=3.13"
+authors = [
+    {name = "Steven Ramondt"},
+]
 dependencies = [
     "httpx>=0.28.1",
     "joblib>=1.4.2",
@@ -20,9 +23,15 @@ dependencies = [
     "xlsxwriter>=3.2.2",
 ]
 
+[project.scripts]
+uitnodigingsregel = "uitnodigingsregel.cli:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/uitnodigingsregel"]
 
 [project.optional-dependencies]
 dev = [
@@ -42,6 +51,9 @@ target-version = "py313"
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
 ignore = ["N803", "N806"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/uitnodigingsregel/app/styles.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
