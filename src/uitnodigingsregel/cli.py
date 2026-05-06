@@ -24,6 +24,8 @@ def main() -> None:
     sys.exit(
         subprocess.call(
             [
+                sys.executable,
+                "-m",
                 "streamlit",
                 "run",
                 str(app_file),
