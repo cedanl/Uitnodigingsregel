@@ -31,28 +31,28 @@ Volledige documentatie, pipeline-overzicht en projectstructuur: **[cedanl.github
 SQL-voorbeeldcode voor de invoerdata is beschikbaar via de [Uitnodigingsregel_datapreparatie](https://github.com/cedanl/Uitnodigingsregel_datapreparatie) repo. Zorg dat de voorbereide data aanwezig is in `data/02-prepared/` voordat je de pipeline draait. Of gebruik de synthetische demo-data.
 Een overzicht van alle basis variabelen staat in de [data dictionary](docs/Variabelen_Definities_v4.xlsx).
 
-## Prerequisites
-If you do not have a Python environment set up, follow these steps:
-1. Install uv on your system:
+## Installatie
 
-- For Windows
+### Via Scoop (Windows)
+```powershell
+scoop bucket add uitnodigingsregel https://github.com/cedanl/Uitnodigingsregel
+scoop install uitnodigingsregel
+uitnodigingsregel
+```
 
-Copy line below in Windows PowerShell
+### Handmatig
+1. Installeer [uv](https://docs.astral.sh/uv/getting-started/installation/):
 ```
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
-Please refer to the official installation guide of [uv](https://docs.astral.sh/uv/getting-started/installation/) for other operating systems and more detailed information.
 
-2. Clone the repository:
-
-Download git if necessary: https://git-scm.com/downloads
+2. Clone de repository:
 ```
 git clone https://github.com/cedanl/Uitnodigingsregel.git
-
 cd Uitnodigingsregel
 ```
 
-3. Install dependencies:
+3. Installeer dependencies:
 ```
 uv sync
 ```
@@ -76,7 +76,7 @@ uv run python main.py
 ### 3 Interactive app
 Launch the Streamlit app for interactive exploration:
 ```
-uv run streamlit run app/main.py
+uv run uitnodigingsregel
 ```
 
 ### Output files
