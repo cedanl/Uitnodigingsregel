@@ -1,0 +1,32 @@
+{
+    "version": "0.1.0",
+    "description": "Dropout prediction models for student intervention planning",
+    "homepage": "https://github.com/cedanl/Uitnodigingsregel",
+    "license": "MIT",
+    "depends": "uv",
+    "url": "https://github.com/cedanl/Uitnodigingsregel/archive/refs/tags/v$version.tar.gz",
+    "hash": "",
+    "extract_dir": "Uitnodigingsregel-$version",
+    "installer": {
+        "script": [
+            "uv sync --directory \"$dir\""
+        ]
+    },
+    "uninstaller": {
+        "script": [
+            "Remove-Item \"$dir\\.venv\" -Recurse -Force -ErrorAction SilentlyContinue"
+        ]
+    },
+    "bin": "uitnodigingsregel.cmd",
+    "post_install": [
+        "Set-Content \"$dir\\uitnodigingsregel.cmd\" @\"",
+        "@echo off",
+        "uv run --directory \"%~dp0\" uitnodigingsregel %*",
+        "\"@"
+    ],
+    "notes": [
+        "Run 'uitnodigingsregel' to launch the interactive Streamlit app.",
+        "Run 'uitnodigingsregel --open' to also open a browser automatically.",
+        "To run the batch pipeline instead: cd $(scoop prefix uitnodigingsregel) && uv run python main.py"
+    ]
+}

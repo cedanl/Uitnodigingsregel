@@ -29,12 +29,12 @@ clean:
 ## Lint using ruff
 .PHONY: lint
 lint:
-	uv run ruff check src app
+	uv run ruff check src tests
 
 ## Format source code with ruff
 .PHONY: format
 format:
-	uv run ruff format src app
+	uv run ruff format src tests
 
 ## Run tests
 .PHONY: test
@@ -63,7 +63,7 @@ run:
 ## Run the Streamlit app
 .PHONY: app
 app:
-	uv run streamlit run app/main.py
+	uv run uitnodigingsregel
 
 #################################################################################
 # Self Documenting Commands                                                     #
