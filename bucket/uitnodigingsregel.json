@@ -4,9 +4,9 @@
     "homepage": "https://github.com/cedanl/Uitnodigingsregel",
     "license": "MIT",
     "depends": "uv",
-    "url": "https://github.com/cedanl/Uitnodigingsregel/archive/refs/tags/v$version.zip",
+    "url": "https://github.com/cedanl/Uitnodigingsregel/archive/refs/tags/v0.1.0.zip",
     "hash": "sha256:a8bb1917239585b46ea662f2f4cda3885513557e365dc374f1e21e187a35aff9",
-    "extract_dir": "Uitnodigingsregel-$version",
+    "extract_dir": "Uitnodigingsregel-0.1.0",
     "installer": {
         "script": [
             "uv sync --directory \"$dir\""
@@ -24,6 +24,13 @@
         "uv run --directory \"%~dp0\" uitnodigingsregel %*",
         "\"@"
     ],
+    "autoupdate": {
+        "url": "https://github.com/cedanl/Uitnodigingsregel/archive/refs/tags/v$version.zip",
+        "extract_dir": "Uitnodigingsregel-$version",
+        "hash": {
+            "url": "$url.sha256"
+        }
+    },
     "notes": [
         "Run 'uitnodigingsregel' to launch the interactive Streamlit app.",
         "Run 'uitnodigingsregel --open' to also open a browser automatically.",
