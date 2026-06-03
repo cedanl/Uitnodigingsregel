@@ -17,8 +17,7 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 ```
 ├── src/uitnodigingsregel/       # Installable package
 │   ├── cli.py                   # CLI entrypoint (uitnodigingsregel command)
-│   ├── dataset.py               # Data cleaning (clean_data, remove_single_value_columns)
-│   ├── features.py              # Feature engineering (convert_categorical_to_dummies, standardize_dataset)
+│   ├── dataset.py               # Data utilities (detect_separator)
 │   ├── evaluate.py              # Model evaluation (load_settings, prepare_model_predictions, etc.)
 │   ├── visualize.py             # Plotting (generate_precision_plot, generate_sensitivity_plot, etc.)
 │   ├── analyze.py               # Analysis helpers (get_coefficient_table, get_top_svm_features, etc.)
