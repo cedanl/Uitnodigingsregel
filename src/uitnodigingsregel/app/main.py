@@ -231,7 +231,14 @@ def show_start_screen() -> None:
                     prepared.train_df_scaled, seed, dropout_col, settings.get("svm_parameters", {})
                 )
         else:
-            rf_model, lasso_model, svm_model = load_models()
+            try:
+                rf_model, lasso_model, svm_model = load_models()
+            except FileNotFoundError:
+                st.error(
+                    "Er zijn nog geen getrainde modellen gevonden. "
+                    "Vink **Modellen opnieuw trainen** aan en start de analyse opnieuw."
+                )
+                st.stop()
 
         with st.spinner("Voorspellingen genereren..."):
             rf_ranked = student_signal.rank(rf_model, prepared, use_scaled=False)
