@@ -10,7 +10,7 @@
     "installer": {
         "script": [
             "uv sync --directory \"$dir\"",
-            "@('@echo off', 'uv run --directory \"%~dp0\" uitnodigingsregel %*') | Set-Content \"$dir\\uitnodigingsregel.cmd\""
+            "@('@echo off', 'uv run --directory \"%~dp0.\" uitnodigingsregel %*') | Set-Content \"$dir\\uitnodigingsregel.cmd\""
         ]
     },
     "uninstaller": {
