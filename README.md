@@ -33,54 +33,60 @@ Een overzicht van alle basis variabelen staat in de [data dictionary](docs/Varia
 
 ## Installatie
 
-### Via Scoop (Windows)
+### Via Scoop (Windows, aanbevolen)
+Installeer [Scoop](https://scoop.sh) als je dat nog niet hebt, en voer daarna uit:
 ```powershell
 scoop bucket add uitnodigingsregel https://github.com/cedanl/Uitnodigingsregel
 scoop install uitnodigingsregel
 uitnodigingsregel
 ```
 
-### Handmatig
+### Handmatig (Windows, macOS, Linux)
 1. Installeer [uv](https://docs.astral.sh/uv/getting-started/installation/):
-```
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
+
+   **Windows (PowerShell):**
+   ```powershell
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+   **macOS / Linux:**
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
 
 2. Clone de repository:
-```
-git clone https://github.com/cedanl/Uitnodigingsregel.git
-cd Uitnodigingsregel
-```
+   ```
+   git clone https://github.com/cedanl/Uitnodigingsregel.git
+   cd Uitnodigingsregel
+   ```
 
 3. Installeer dependencies:
-```
-uv sync
-```
+   ```
+   uv sync
+   ```
 
-## Use of program
+## Gebruik
 
-### 1 Data quality
-Use the `Model_analysis.qmd` file to create an HTML report to validate data quality and model performance.
+### 1 Datakwaliteit
+Gebruik `Model_analysis.qmd` om een HTML-rapport te genereren voor datakwaliteit en modelprestaties:
 ```
-uv sync
 uv run quarto render Model_analysis.qmd
 ```
-The HTML output file is created in the same folder as the analysis file.
+Het HTML-bestand wordt aangemaakt in dezelfde map als het analysebestand.
 
-### 2 Make predictions
-Run the pipeline to generate ranked student predictions:
+### 2 Voorspellingen draaien
+Draai de pipeline om een gerangschikte lijst van studenten te genereren:
 ```
 uv run python main.py
 ```
 
-### 3 Interactive app
-Launch the Streamlit app for interactive exploration:
+### 3 Interactieve app
+Start de Streamlit-app voor interactieve verkenning:
 ```
 uv run uitnodigingsregel
 ```
 
-### Output files
-After execution, the generated prediction files will be saved in `models/predictions/`.
+### Outputbestanden
+Na uitvoering worden de voorspellingsbestanden opgeslagen in `models/predictions/`.
 
 
 ## Contributors
