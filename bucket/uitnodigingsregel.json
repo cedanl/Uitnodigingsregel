@@ -4,8 +4,8 @@
     "homepage": "https://github.com/cedanl/Uitnodigingsregel",
     "license": "MIT",
     "depends": "uv",
-    "url": "https://github.com/cedanl/Uitnodigingsregel/archive/refs/tags/v$version.tar.gz",
-    "hash": "sha256:4ab5b11ef68978029ff053c60992d1660989f5d3262a46d63d7c877c2f2f2501",
+    "url": "https://github.com/cedanl/Uitnodigingsregel/archive/refs/tags/v$version.zip",
+    "hash": "sha256:a8bb1917239585b46ea662f2f4cda3885513557e365dc374f1e21e187a35aff9",
     "extract_dir": "Uitnodigingsregel-$version",
     "installer": {
         "script": [
