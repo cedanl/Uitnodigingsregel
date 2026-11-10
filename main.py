@@ -6,7 +6,11 @@ import pandas as pd
 import student_signal
 
 from uitnodigingsregel.evaluate import load_settings
-from uitnodigingsregel.modeling.predict import load_models
+from uitnodigingsregel.modeling.predict import (
+    compute_data_fingerprint,
+    load_models,
+    save_fingerprint,
+)
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
 
@@ -74,6 +78,7 @@ def run_pipeline(
             settings["svm_parameters"],
             model_path=models_dir / "support_vector_machine.joblib",
         )
+        save_fingerprint(compute_data_fingerprint(train_df), models_dir)
     else:
         print("retrain_models is False in config, loading pre-trained models")
         rf_model, lasso_model, svm_model = load_models(models_dir=models_dir)
