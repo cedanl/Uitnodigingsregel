@@ -1,11 +1,16 @@
 # Uitnodigingsregel
 
-Python project voor het voorspellen van eerstejaars studentuitval.
+De Uitnodigingsregel signaleert studenten met een verhoogd risico op uitval in het eerste jaar. Modellen leren van eerdere cohorten en zetten de huidige studenten op volgorde van risico. Begeleiders gebruiken die lijst om studenten uit te nodigen voor een gesprek.
 
-## Snel aan de slag
+De methode is ontwikkeld in het promotieonderzoek van Irene Eegdeman. Deze repository bevat een Python-implementatie met een app die op je eigen computer draait.
 
-Zie [Aan de slag](aan-de-slag.md) voor installatie-instructies en een overzicht van de pipeline.
+## Verder lezen
+
+- [Aan de slag](aan-de-slag.md): installeren en de app starten.
+- [Je data aanleveren](data-aanleveren.md): welke bestanden en kolommen nodig zijn.
+- [Resultaten lezen](resultaten-lezen.md): de ranglijst en het rapport over modelkwaliteit.
+- [API-referentie](api/index.md): de functies van het Python-package.
 
 ## Over dit project
 
-Dit project is onderdeel van de [CEDA](https://github.com/cedanl) organisatie.
+Dit project is onderdeel van [CEDA](https://github.com/cedanl). Achtergrond over de methode staat in de [README](https://github.com/cedanl/Uitnodigingsregel#readme).

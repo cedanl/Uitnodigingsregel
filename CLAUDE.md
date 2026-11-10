@@ -36,11 +36,15 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 │   │   └── user_data/           # User-provided data (gitignored)
 │   ├── 02-prepared/             # Standardized datasets
 │   └── 03-output/               # Processed datasets
-├── models/                      # Trained model files (.joblib)
+├── models/                      # Trained model files (.joblib) and training_data.json (gitignored)
+│   ├── predictions/             # Ranked lists written by main.py
+│   └── report/                  # Models trained by the report
 ├── reports/                     # Generated reports and figures
+├── tests/                       # Unit tests and pipeline smoke test
+├── snapshots/                   # Golden master comparison of pipeline output
+├── docs/                        # MkDocs site (GitHub Pages)
 ├── Model_analysis.qmd           # Quarto analysis report
 ├── main.py                      # Pipeline entrypoint
-├── config.yaml                  # Root config (used by main.py and .qmd)
 └── Makefile                     # Convenience commands
 ```
 
@@ -49,9 +53,10 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 uv sync                              # Install dependencies
 uv run python main.py                # Run full pipeline
 uv run uitnodigingsregel             # Launch interactive app (CLI)
-quarto render Model_analysis.qmd     # Render analysis report
-uv run ruff check src                # Lint
+uv run quarto render Model_analysis.qmd  # Render analysis report
+uv run ruff check src tests main.py  # Lint
 uv run pytest                        # Test
+uv run --group docs mkdocs build --strict  # Build docs
 ```
 
 ## Data

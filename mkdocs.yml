@@ -74,5 +74,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Aan de slag: aan-de-slag.md
+  - Je data aanleveren: data-aanleveren.md
+  - Resultaten lezen: resultaten-lezen.md
   - API-referentie:
     - api/index.md

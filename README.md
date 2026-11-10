@@ -24,12 +24,13 @@ Wil je de Uitnodigingsregel toepassen binnen jouw onderwijsinstelling? Houd dan 
 
 # Aan de slag
 
-Volledige documentatie, pipeline-overzicht en projectstructuur: **[cedanl.github.io/Uitnodigingsregel](https://cedanl.github.io/Uitnodigingsregel/)**
+Volledige documentatie: **[cedanl.github.io/Uitnodigingsregel](https://cedanl.github.io/Uitnodigingsregel/)**
 
 ## Datavoorbereiding
 
-SQL-voorbeeldcode voor de invoerdata is beschikbaar via de [Uitnodigingsregel_datapreparatie](https://github.com/cedanl/Uitnodigingsregel_datapreparatie) repo. Zorg dat de voorbereide data aanwezig is in `data/02-prepared/` voordat je de pipeline draait. Of gebruik de synthetische demo-data.
-Een overzicht van alle basis variabelen staat in de [data dictionary](docs/Variabelen_Definities_v4.xlsx).
+Je kunt de app uitproberen met de meegeleverde synthetische demo-data. Voor eigen data heb je een bestand met trainingsdata en een bestand met predictiedata nodig. De eisen aan die bestanden staan in [Je data aanleveren](https://cedanl.github.io/Uitnodigingsregel/data-aanleveren/).
+
+SQL-voorbeeldcode voor de invoerdata staat in de [Uitnodigingsregel_datapreparatie](https://github.com/cedanl/Uitnodigingsregel_datapreparatie) repo. Een overzicht van de basisvariabelen staat in de [data dictionary](docs/Variabelen_Definities_v4.xlsx).
 
 ## Installatie
 
@@ -64,29 +65,29 @@ uitnodigingsregel
    uv sync
    ```
 
+Voor het rapport over modelkwaliteit is daarnaast [Quarto](https://quarto.org/docs/get-started/) nodig.
+
 ## Gebruik
 
-### 1 Datakwaliteit
-Gebruik `Model_analysis.qmd` om een HTML-rapport te genereren voor datakwaliteit en modelprestaties:
+### App
+Start de app. Na een installatie via Scoop is het commando `uitnodigingsregel --open`.
 ```
-uv run quarto render Model_analysis.qmd
+uv run uitnodigingsregel --open
 ```
-Het HTML-bestand wordt aangemaakt in dezelfde map als het analysebestand.
+Kies de demo-data of upload je eigen bestanden en start de analyse. De app toont per model een ranglijst van studenten en maakt op verzoek een rapport over datakwaliteit en modelprestaties. Hoe je die leest, staat in [Resultaten lezen](https://cedanl.github.io/Uitnodigingsregel/resultaten-lezen/).
 
-### 2 Voorspellingen draaien
-Draai de pipeline om een gerangschikte lijst van studenten te genereren:
+### Zonder app
+Zet je bestanden neer als `data/01-raw/user_data/train.csv` en `data/01-raw/user_data/pred.csv`. Ontbreken ze, dan wordt de demo-data gebruikt.
+
+Draai de pipeline. De ranglijsten komen in `models/predictions/`.
 ```
 uv run python main.py
 ```
 
-### 3 Interactieve app
-Start de Streamlit-app voor interactieve verkenning:
+Maak het rapport. Het HTML-bestand komt in de map van de repository.
 ```
-uv run uitnodigingsregel
+uv run quarto render Model_analysis.qmd
 ```
-
-### Outputbestanden
-Na uitvoering worden de voorspellingsbestanden opgeslagen in `models/predictions/`.
 
 
 ## Contributors
