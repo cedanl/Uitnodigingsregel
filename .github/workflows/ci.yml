@@ -59,8 +59,7 @@ jobs:
 
       - name: Verify CLI entrypoint
         run: uv run uitnodigingsregel --help
-        timeout-minutes: 1
-        continue-on-error: true
+        timeout-minutes: 2
 
       - name: Verify package import
         run: uv run python -c "import uitnodigingsregel; print('import ok')"
