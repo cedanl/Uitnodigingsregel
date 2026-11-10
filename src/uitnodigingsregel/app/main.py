@@ -3,7 +3,6 @@
 import io
 import os
 import shutil
-import subprocess
 from pathlib import Path
 
 import httpx
@@ -22,6 +21,7 @@ from uitnodigingsregel.modeling.predict import (
     save_fingerprint,
 )
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
+from uitnodigingsregel.report import DEMO_LABEL, ReportError, render_report
 
 ROOT_DIR = Path.cwd()
 settings = load_settings()
@@ -45,6 +45,8 @@ if "ranked" not in st.session_state:
     st.session_state.ranked = None
 if "rapport_bytes" not in st.session_state:
     st.session_state.rapport_bytes = None
+if "rapport_bron" not in st.session_state:
+    st.session_state.rapport_bron = None
 
 
 # ─────────────────────────────────────────────
@@ -207,9 +209,11 @@ def show_start_screen() -> None:
             if use_demo:
                 train_source = settings["synth_data_dir_train"]
                 pred_source = settings["synth_data_dir_pred"]
+                train_label = DEMO_LABEL
             else:
                 train_source = train_file.getvalue()
                 pred_source = pred_file.getvalue()
+                train_label = f"het bestand {train_file.name}"
 
             try:
                 train_df, pred_df = load_student_data(
@@ -252,6 +256,8 @@ def show_start_screen() -> None:
         st.session_state.prepared = prepared
         st.session_state.models = {"rf": rf_model, "lasso": lasso_model, "svm": svm_model}
         st.session_state.ranked = {"rf": rf_ranked, "lasso": lasso_ranked, "svm": svm_ranked}
+        st.session_state.rapport_bytes = None
+        st.session_state.rapport_bron = (train_source, train_label)
         st.session_state.current_page = "main"
         st.rerun()
 
@@ -275,6 +281,7 @@ def show_main_screen() -> None:
             st.session_state.models = None
             st.session_state.ranked = None
             st.session_state.rapport_bytes = None
+            st.session_state.rapport_bron = None
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -284,35 +291,30 @@ def show_main_screen() -> None:
 
     # ── Quarto rapport ──
     quarto_bin = shutil.which("quarto")
-    html_path = ROOT_DIR / "Model_analysis.html"
-
-    if st.session_state.rapport_bytes is None and html_path.exists():
-        st.session_state.rapport_bytes = html_path.read_bytes()
+    train_source, train_label = st.session_state.rapport_bron
 
     st.markdown("#### Modelkwaliteit & Toelichting")
     st.caption(
-        "Bekijk hoe goed het model presteert op jouw data en welke factoren uitval "
-        "voorspellen — en beoordeel of inzet verantwoord is."
+        f"Het rapport beschrijft {train_label}: hoe goed de modellen daarop presteren en "
+        "welke factoren uitval voorspellen. Gebruik het om te beoordelen of inzet verantwoord is."
     )
 
     if quarto_bin is None:
-        st.warning("Quarto niet gevonden — rapport kan niet gegenereerd worden.")
+        st.warning(
+            "Het rapport kan niet gemaakt worden, omdat Quarto niet is geïnstalleerd. "
+            "Installeer Quarto via [quarto.org](https://quarto.org/docs/get-started/) "
+            "en start de app daarna opnieuw."
+        )
     else:
         if st.button("Genereer rapport", type="primary"):
-            with st.spinner("Rapport genereren (~30 seconden)..."):
-                result = subprocess.run(
-                    [quarto_bin, "render", "Model_analysis.qmd"],
-                    cwd=ROOT_DIR,
-                    capture_output=True,
-                    text=True,
-                )
-            if result.returncode == 0:
-                if html_path.exists():
-                    st.session_state.rapport_bytes = html_path.read_bytes()
-                else:
-                    st.error("Render geslaagd maar HTML niet gevonden.")
-            else:
-                st.error(f"Render mislukt:\n{result.stderr[-500:]}")
+            with st.spinner("Rapport genereren (de modellen worden hiervoor apart getraind)..."):
+                try:
+                    st.session_state.rapport_bytes = render_report(
+                        quarto_bin, train_source, train_label, ROOT_DIR
+                    )
+                except ReportError as e:
+                    st.session_state.rapport_bytes = None
+                    st.error(f"Het rapport kon niet gemaakt worden:\n{e}")
 
     if st.session_state.rapport_bytes:
         st.download_button(

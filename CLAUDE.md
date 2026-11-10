@@ -21,6 +21,7 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 │   ├── evaluate.py              # Model evaluation (load_settings, prepare_model_predictions, etc.)
 │   ├── visualize.py             # Plotting (generate_precision_plot, generate_sensitivity_plot, etc.)
 │   ├── analyze.py               # Analysis helpers (get_coefficient_table, get_top_svm_features, etc.)
+│   ├── report.py                # Quarto report: input data selection and rendering (render_report)
 │   ├── modeling/
 │   │   ├── train.py             # Model training (train_random_forest, train_lasso, train_svm)
 │   │   └── predict.py           # Model prediction (predict_random_forest, predict_lasso, predict_svm)
@@ -59,4 +60,5 @@ uv run pytest                        # Test
 - Demo data in `data/01-raw/demo/` uses synthetic data
 - User data goes in `data/01-raw/user_data/` (gitignored)
 - CSV input: separator is detected automatically (tab, `;`, `,`, `|`); decimal comma is accepted when the separator is not `,`
+- The report describes the training data passed by the app (env `UITNODIGINGSREGEL_TRAIN_DATA`), else `data/01-raw/user_data/train.csv`, else the demo data. It trains its own models on an 80% split in `models/report/`; the pipeline models in `models/` are trained on all data
 - Training and prediction data need the same columns; a missing `Dropout` column in the prediction data is added with value 0

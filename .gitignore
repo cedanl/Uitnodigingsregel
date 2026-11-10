@@ -177,6 +177,7 @@ data/03-output/*.parquet
 data/01-raw/user_data/
 models/*.joblib
 models/training_data.json
+models/report/
 models/predictions/
 reports/*.txt
 reports/figures/
