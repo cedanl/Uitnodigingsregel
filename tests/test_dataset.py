@@ -51,8 +51,8 @@ def test_read_handles_excel_encodings() -> None:
 
 def test_load_demo_data_equals_plain_read() -> None:
     train_df, pred_df = load_student_data(DEMO_TRAIN, DEMO_PRED)
-    expected_train = pd.read_csv(DEMO_TRAIN, sep="\t").drop_duplicates()
-    expected_pred = pd.read_csv(DEMO_PRED, sep="\t").drop_duplicates()
+    expected_train = pd.read_csv(DEMO_TRAIN, sep="\t").drop_duplicates().reset_index(drop=True)
+    expected_pred = pd.read_csv(DEMO_PRED, sep="\t").drop_duplicates().reset_index(drop=True)
     pd.testing.assert_frame_equal(train_df, expected_train)
     pd.testing.assert_frame_equal(pred_df, expected_pred)
 
@@ -61,6 +61,14 @@ def test_load_adds_missing_target_to_prediction_data() -> None:
     train = _train_df().to_csv(sep=";", index=False).encode("utf-8")
     pred = _pred_df().drop(columns=["Dropout"]).to_csv(sep=";", index=False).encode("utf-8")
     _, pred_df = load_student_data(train, pred)
+    pd.testing.assert_frame_equal(pred_df, _pred_df())
+
+
+def test_load_renumbers_rows_after_removing_duplicates() -> None:
+    train = pd.concat([_train_df().iloc[:2], _train_df()]).to_csv(sep=";", index=False)
+    pred = pd.concat([_pred_df().iloc[:2], _pred_df()]).to_csv(sep=";", index=False)
+    train_df, pred_df = load_student_data(train.encode("utf-8"), pred.encode("utf-8"))
+    pd.testing.assert_frame_equal(train_df, _train_df())
     pd.testing.assert_frame_equal(pred_df, _pred_df())
 
 
