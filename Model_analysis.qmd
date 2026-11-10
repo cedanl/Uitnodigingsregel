@@ -50,7 +50,7 @@ from uitnodigingsregel.analyze import (
     display_top_features,
     parse_model_metrics,
 )
-from uitnodigingsregel.dataset import detect_separator
+from uitnodigingsregel.dataset import read_student_data
 from uitnodigingsregel.evaluate import (
     display_model_results,
     generate_stoplight_evaluation,
@@ -59,7 +59,9 @@ from uitnodigingsregel.evaluate import (
     save_model_metrics,
     save_threshold_analysis,
 )
+from uitnodigingsregel.modeling.predict import MODEL_FILES
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
+from uitnodigingsregel.report import REPORT_MODELS_DIR, resolve_report_data
 from uitnodigingsregel.visualize import (
     generate_precision_plot,
     generate_sensitivity_plot,
@@ -85,17 +87,9 @@ plt.rcParams['axes.formatter.limits'] = (-2, 2)
 sns.set_style("whitegrid")
 sns.set_context("notebook", font_scale=1.2)
 
-# Data loading: use user data if present, otherwise use synthetic data (training data only)
-user_train_path = Path(settings['user_data_dir_train'])
-if user_train_path.exists():
-    train_sep = detect_separator(user_train_path, dropout_column)
-    train_df = pd.read_csv(user_train_path, sep=train_sep, engine='python')
-    data_type = "instelling"
-else:
-    synth_train_path = Path(settings['synth_data_dir_train'])
-    train_sep = detect_separator(synth_train_path, dropout_column)
-    train_df = pd.read_csv(synth_train_path, sep=train_sep, engine='python')
-    data_type = "synthetische"
+# Training data: passed by the app, else the user's own file, else the synthetic demo data
+train_path, train_label = resolve_report_data(settings)
+train_df = read_student_data(train_path, settings['studentnumber_column'])
 
 train_clean = train_df.drop_duplicates()
 prepared = student_signal.prepare(
@@ -108,7 +102,10 @@ prepared = student_signal.prepare(
 train_processed = prepared.train_df
 train_df_sdd = prepared.train_df_scaled
 
-print(f"Opmerking: Deze analyse is uitgevoerd op {data_type} data.")
+print(
+    f"Opmerking: deze analyse is uitgevoerd op {train_label} "
+    f"({len(train_clean)} studenten in de trainingsdata)."
+)
 ```
 
 # Model Aanbeveling en Evaluatie
@@ -140,9 +137,11 @@ try:
     # --- 2. Train or load models ---
     if retrain_models:
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-                best_rf_model = train_random_forest(pd.concat([X_train, y_train], axis=1), random_seed, dropout_column, rf_parameters)
-                best_lasso_model = train_lasso(pd.concat([X_train_sdd, y_train_sdd], axis=1), random_seed, dropout_column, alpha_range)
-                best_svm_model = train_svm(pd.concat([X_train_sdd, y_train_sdd], axis=1), random_seed, dropout_column, svm_parameters)
+                # Trained on the 80% split only, so stored apart from the pipeline models in models/
+                rf_path, lasso_path, svm_path = (REPORT_MODELS_DIR / name for name in MODEL_FILES)
+                best_rf_model = train_random_forest(pd.concat([X_train, y_train], axis=1), random_seed, dropout_column, rf_parameters, model_path=rf_path)
+                best_lasso_model = train_lasso(pd.concat([X_train_sdd, y_train_sdd], axis=1), random_seed, dropout_column, alpha_range, model_path=lasso_path)
+                best_svm_model = train_svm(pd.concat([X_train_sdd, y_train_sdd], axis=1), random_seed, dropout_column, svm_parameters, model_path=svm_path)
     else:
         best_rf_model = joblib.load('models/random_forest_regressor.joblib')
         best_lasso_model = joblib.load('models/lasso_regression.joblib')
