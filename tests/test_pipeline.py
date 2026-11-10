@@ -68,3 +68,19 @@ def test_pipeline_reads_semicolon_separated_data(settings: dict, tmp_path: Path)
     ranked = run_pipeline(train_path, pred_path, settings, models_dir=tmp_path / "models")
 
     _assert_ranked_lists_cover_students(ranked, pred_df, id_col)
+
+
+def test_duplicate_rows_do_not_shift_scores_between_students(
+    settings: dict, tmp_path: Path
+) -> None:
+    pred_df = pd.read_csv(DEMO_PRED, sep="\t").drop_duplicates()
+    pred_path = tmp_path / "pred_with_duplicates.csv"
+    pd.concat([pred_df.iloc[:3], pred_df]).to_csv(pred_path, sep="\t", index=False)
+    models_dir = tmp_path / "models"
+
+    expected = run_pipeline(DEMO_TRAIN, DEMO_PRED, settings, models_dir=models_dir)
+    settings["retrain_models"] = False
+    ranked = run_pipeline(DEMO_TRAIN, pred_path, settings, models_dir=models_dir)
+
+    for expected_df, ranked_df in zip(expected, ranked, strict=True):
+        pd.testing.assert_frame_equal(expected_df, ranked_df)

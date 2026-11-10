@@ -91,7 +91,7 @@ sns.set_context("notebook", font_scale=1.2)
 train_path, train_label = resolve_report_data(settings)
 train_df = read_student_data(train_path, settings['studentnumber_column'])
 
-train_clean = train_df.drop_duplicates()
+train_clean = train_df.drop_duplicates().reset_index(drop=True)
 prepared = student_signal.prepare(
     train_clean,
     train_clean.copy(),

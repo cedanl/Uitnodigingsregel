@@ -184,8 +184,8 @@ def load_student_data(
     Raises:
         DataValidationError: If the data cannot be used by the pipeline.
     """
-    train_df = read_student_data(train_source, id_column).drop_duplicates()
-    pred_df = read_student_data(pred_source, id_column).drop_duplicates()
+    train_df = read_student_data(train_source, id_column).drop_duplicates().reset_index(drop=True)
+    pred_df = read_student_data(pred_source, id_column).drop_duplicates().reset_index(drop=True)
 
     if target_column in train_df.columns and target_column not in pred_df.columns:
         pred_df.insert(train_df.columns.get_loc(target_column), target_column, 0)
