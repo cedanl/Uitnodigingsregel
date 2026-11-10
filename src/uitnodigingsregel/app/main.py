@@ -13,6 +13,7 @@ import student_signal
 from docx import Document
 
 from uitnodigingsregel.app.styles import MAIN_CSS, START_CSS
+from uitnodigingsregel.dataset import DataValidationError, load_student_data
 from uitnodigingsregel.evaluate import load_settings
 from uitnodigingsregel.modeling.predict import (
     check_models_match_data,
@@ -201,32 +202,26 @@ def show_start_screen() -> None:
     if st.button("Start analyse", type="primary", disabled=not ready):
         dropout_col = settings["dropout_column"]
         studentnr_col = settings["studentnumber_column"]
-        separator = settings["separator"]
 
         with st.spinner("Data laden en voorbereiden..."):
             if use_demo:
-                train_df = pd.read_csv(
-                    settings["synth_data_dir_train"], sep=separator, engine="python"
-                )
-                pred_df = pd.read_csv(
-                    settings["synth_data_dir_pred"], sep=separator, engine="python"
-                )
+                train_source = settings["synth_data_dir_train"]
+                pred_source = settings["synth_data_dir_pred"]
             else:
-                train_df = pd.read_csv(
-                    io.StringIO(train_file.getvalue().decode("utf-8")),
-                    sep=separator,
-                    engine="python",
-                )
-                pred_df = pd.read_csv(
-                    io.StringIO(pred_file.getvalue().decode("utf-8")),
-                    sep=separator,
-                    engine="python",
-                )
+                train_source = train_file.getvalue()
+                pred_source = pred_file.getvalue()
 
-            train_df = train_df.drop_duplicates()
+            try:
+                train_df, pred_df = load_student_data(
+                    train_source, pred_source, dropout_col, studentnr_col
+                )
+            except DataValidationError as e:
+                st.error(str(e))
+                st.stop()
+
             prepared = student_signal.prepare(
                 train_df,
-                pred_df.drop_duplicates(),
+                pred_df,
                 target_col=dropout_col,
                 id_col=studentnr_col,
                 config={"imputation": {"n_neighbors": settings["knn_neighbors"]}},

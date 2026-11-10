@@ -17,7 +17,7 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 ```
 ├── src/uitnodigingsregel/       # Installable package
 │   ├── cli.py                   # CLI entrypoint (uitnodigingsregel command)
-│   ├── dataset.py               # Data utilities (detect_separator)
+│   ├── dataset.py               # Data loading and validation (load_student_data, detect_separator)
 │   ├── evaluate.py              # Model evaluation (load_settings, prepare_model_predictions, etc.)
 │   ├── visualize.py             # Plotting (generate_precision_plot, generate_sensitivity_plot, etc.)
 │   ├── analyze.py               # Analysis helpers (get_coefficient_table, get_top_svm_features, etc.)
@@ -58,4 +58,5 @@ uv run pytest                        # Test
 - Output: ranked students by predicted dropout probability
 - Demo data in `data/01-raw/demo/` uses synthetic data
 - User data goes in `data/01-raw/user_data/` (gitignored)
-- CSV delimiter: `;`
+- CSV input: separator is detected automatically (tab, `;`, `,`, `|`); decimal comma is accepted when the separator is not `,`
+- Training and prediction data need the same columns; a missing `Dropout` column in the prediction data is added with value 0

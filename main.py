@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 import student_signal
 
+from uitnodigingsregel.dataset import load_student_data
 from uitnodigingsregel.evaluate import load_settings
 from uitnodigingsregel.modeling.predict import (
     compute_data_fingerprint,
@@ -34,18 +35,15 @@ def run_pipeline(
     if models_dir is None:
         models_dir = Path("models")
 
-    separator = settings["separator"]
     dropout_column = settings["dropout_column"]
     studentnumber_column = settings["studentnumber_column"]
     retrain_models = settings["retrain_models"]
     random_seed = settings["random_seed"]
     knn_neighbors = settings["knn_neighbors"]
 
-    train_df = pd.read_csv(train_path, sep=separator, engine="python")
-    pred_df = pd.read_csv(pred_path, sep=separator, engine="python")
-
-    train_df = train_df.drop_duplicates()
-    pred_df = pred_df.drop_duplicates()
+    train_df, pred_df = load_student_data(
+        train_path, pred_path, dropout_column, studentnumber_column
+    )
 
     prepared = student_signal.prepare(
         train_df,
