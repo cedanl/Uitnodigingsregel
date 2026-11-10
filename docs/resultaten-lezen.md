@@ -9,7 +9,7 @@ Per model krijg je een lijst met drie kolommen:
 | Kolom | Betekenis |
 |---|---|
 | `rank` | Plaats in de lijst. Nummer 1 heeft volgens het model het hoogste risico op uitval. |
-| `Studentnummer` | De student. |
+| `Studentnummer` | De student, in de identificatiekolom uit je eigen bestand. |
 | `score` | De uitkomst van het model waarop de volgorde is gebaseerd. Hoger betekent meer risico. |
 
 De score is geen exacte kans op uitval. Vergelijk scores niet tussen modellen en gebruik de volgorde, niet het getal.

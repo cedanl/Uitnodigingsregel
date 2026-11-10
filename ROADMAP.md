@@ -10,6 +10,3 @@ De actuele planning staat op het [CEDA Board](https://github.com/orgs/cedanl/pro
 
 ### Hierna
 - Transitie van applicatie in huidige vorm (localhost) naar formeel volwaardige desktop applicatie (en/of centrale hosting via SURF)
-
-### Later / ideeën
-- Zie [pijnpunten](PAINPOINTS_OVERVIEW.md)

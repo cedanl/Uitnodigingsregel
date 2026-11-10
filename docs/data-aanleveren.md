@@ -22,10 +22,12 @@ SQL-voorbeeldcode om deze bestanden uit je studentinformatiesysteem te halen sta
 
 | Kolom | Trainingsdata | Predictiedata |
 |---|---|---|
-| `Studentnummer` | Verplicht | Verplicht |
+| Een kolom die de student identificeert. Standaard heet die `Studentnummer`. | Verplicht | Verplicht |
 | `Dropout` | Verplicht: `1` voor uitgevallen, `0` voor niet uitgevallen. Geen lege cellen. Beide waarden moeten voorkomen. | Mag ontbreken. De kolom wordt dan aangevuld met `0`. |
 
-Heten deze kolommen bij jou anders, pas dan `dropout_column` en `studentnumber_column` aan in `src/uitnodigingsregel/metadata/config.yaml`.
+De namen van beide kolommen zijn instelbaar. Heten ze bij jou anders, pas dan `studentnumber_column` en `dropout_column` aan in `src/uitnodigingsregel/metadata/config.yaml`.
+
+De identificatie mag elk nummer zijn waarmee je de student terugvindt, niet per se het studentnummer. De waarde moet op dit moment wel een getal zijn; een naam of code met letters werkt nog niet.
 
 **Overige kolommen**
 
@@ -54,7 +56,7 @@ Voldoet een bestand niet aan de eisen, dan stopt de app vóór het trainen met e
 
 | Melding | Oorzaak |
 |---|---|
-| "ontbreekt de kolom …" | `Studentnummer` of `Dropout` staat niet in het bestand, of het scheidingsteken is niet herkend. De melding toont de gevonden kolommen. |
+| "ontbreekt de kolom …" | De identificatiekolom of `Dropout` staat niet in het bestand, of het scheidingsteken is niet herkend. De melding toont de gevonden kolommen. |
 | "mag alleen 0 en 1 bevatten" | `Dropout` bevat andere waarden of lege cellen. |
 | "moeten dezelfde kolommen hebben" | Een kolom staat maar in één van de twee bestanden. |
 | "geen kolommen met getallen" | Getallen zijn als tekst opgeslagen, bijvoorbeeld met een eenheid erachter. |
