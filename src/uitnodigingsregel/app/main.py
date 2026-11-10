@@ -13,8 +13,14 @@ import student_signal
 from docx import Document
 
 from uitnodigingsregel.app.styles import MAIN_CSS, START_CSS
+from uitnodigingsregel.dataset import DataValidationError, load_student_data
 from uitnodigingsregel.evaluate import load_settings
-from uitnodigingsregel.modeling.predict import load_models
+from uitnodigingsregel.modeling.predict import (
+    check_models_match_data,
+    compute_data_fingerprint,
+    load_models,
+    save_fingerprint,
+)
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
 ROOT_DIR = Path.cwd()
@@ -167,7 +173,15 @@ def show_start_screen() -> None:
         with col2:
             pred_file = st.file_uploader("Predictiedata (CSV)", type=["csv"])
 
-    retrain = st.checkbox("Modellen opnieuw trainen", value=False)
+    retrain = st.checkbox(
+        "Modellen opnieuw trainen",
+        value=False,
+        help=(
+            "Bij nieuwe of gewijzigde trainingsdata worden de modellen automatisch getraind. "
+            "Vink dit aan om ze ook bij ongewijzigde data opnieuw te trainen, "
+            "bijvoorbeeld na een aanpassing van de instellingen."
+        ),
+    )
 
     st.markdown("---")
 
@@ -188,38 +202,34 @@ def show_start_screen() -> None:
     if st.button("Start analyse", type="primary", disabled=not ready):
         dropout_col = settings["dropout_column"]
         studentnr_col = settings["studentnumber_column"]
-        separator = settings["separator"]
 
         with st.spinner("Data laden en voorbereiden..."):
             if use_demo:
-                train_df = pd.read_csv(
-                    settings["synth_data_dir_train"], sep=separator, engine="python"
-                )
-                pred_df = pd.read_csv(
-                    settings["synth_data_dir_pred"], sep=separator, engine="python"
-                )
+                train_source = settings["synth_data_dir_train"]
+                pred_source = settings["synth_data_dir_pred"]
             else:
-                train_df = pd.read_csv(
-                    io.StringIO(train_file.getvalue().decode("utf-8")),
-                    sep=separator,
-                    engine="python",
+                train_source = train_file.getvalue()
+                pred_source = pred_file.getvalue()
+
+            try:
+                train_df, pred_df = load_student_data(
+                    train_source, pred_source, dropout_col, studentnr_col
                 )
-                pred_df = pd.read_csv(
-                    io.StringIO(pred_file.getvalue().decode("utf-8")),
-                    sep=separator,
-                    engine="python",
-                )
+            except DataValidationError as e:
+                st.error(str(e))
+                st.stop()
 
             prepared = student_signal.prepare(
-                train_df.drop_duplicates(),
-                pred_df.drop_duplicates(),
+                train_df,
+                pred_df,
                 target_col=dropout_col,
                 id_col=studentnr_col,
                 config={"imputation": {"n_neighbors": settings["knn_neighbors"]}},
             )
 
-        if retrain:
-            with st.spinner("Modellen trainen (dit kan even duren)..."):
+        fingerprint = compute_data_fingerprint(train_df)
+        if retrain or not check_models_match_data(fingerprint):
+            with st.spinner("Modellen trainen op deze data (dit kan enkele minuten duren)..."):
                 seed = settings.get("random_seed", 42)
                 rf_model = train_random_forest(
                     prepared.train_df, seed, dropout_col, settings.get("rf_parameters", {})
@@ -230,15 +240,9 @@ def show_start_screen() -> None:
                 svm_model = train_svm(
                     prepared.train_df_scaled, seed, dropout_col, settings.get("svm_parameters", {})
                 )
+                save_fingerprint(fingerprint)
         else:
-            try:
-                rf_model, lasso_model, svm_model = load_models()
-            except FileNotFoundError:
-                st.error(
-                    "Er zijn nog geen getrainde modellen gevonden. "
-                    "Vink **Modellen opnieuw trainen** aan en start de analyse opnieuw."
-                )
-                st.stop()
+            rf_model, lasso_model, svm_model = load_models()
 
         with st.spinner("Voorspellingen genereren..."):
             rf_ranked = student_signal.rank(rf_model, prepared, use_scaled=False)

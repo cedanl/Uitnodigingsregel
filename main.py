@@ -5,8 +5,13 @@ from pathlib import Path
 import pandas as pd
 import student_signal
 
+from uitnodigingsregel.dataset import load_student_data
 from uitnodigingsregel.evaluate import load_settings
-from uitnodigingsregel.modeling.predict import load_models
+from uitnodigingsregel.modeling.predict import (
+    compute_data_fingerprint,
+    load_models,
+    save_fingerprint,
+)
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 
 
@@ -30,18 +35,15 @@ def run_pipeline(
     if models_dir is None:
         models_dir = Path("models")
 
-    separator = settings["separator"]
     dropout_column = settings["dropout_column"]
     studentnumber_column = settings["studentnumber_column"]
     retrain_models = settings["retrain_models"]
     random_seed = settings["random_seed"]
     knn_neighbors = settings["knn_neighbors"]
 
-    train_df = pd.read_csv(train_path, sep=separator, engine="python")
-    pred_df = pd.read_csv(pred_path, sep=separator, engine="python")
-
-    train_df = train_df.drop_duplicates()
-    pred_df = pred_df.drop_duplicates()
+    train_df, pred_df = load_student_data(
+        train_path, pred_path, dropout_column, studentnumber_column
+    )
 
     prepared = student_signal.prepare(
         train_df,
@@ -74,6 +76,7 @@ def run_pipeline(
             settings["svm_parameters"],
             model_path=models_dir / "support_vector_machine.joblib",
         )
+        save_fingerprint(compute_data_fingerprint(train_df), models_dir)
     else:
         print("retrain_models is False in config, loading pre-trained models")
         rf_model, lasso_model, svm_model = load_models(models_dir=models_dir)
