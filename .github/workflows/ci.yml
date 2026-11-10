@@ -60,6 +60,9 @@ jobs:
       - name: Verify CLI entrypoint
         run: uv run uitnodigingsregel --help
         timeout-minutes: 2
+        env:
+          # Streamlit's help text holds characters the default Windows pipe encoding cannot print
+          PYTHONUTF8: "1"
 
       - name: Verify package import
         run: uv run python -c "import uitnodigingsregel; print('import ok')"
