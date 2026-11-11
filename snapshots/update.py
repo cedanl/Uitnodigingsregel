@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).parent.parent
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 sys.path.insert(0, str(REPO_ROOT))
 
-from uitnodigingsregel.evaluate import load_settings  # noqa: E402
+from uitnodigingsregel.settings import load_settings  # noqa: E402
 
 
 def main() -> None:

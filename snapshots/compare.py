@@ -35,7 +35,7 @@ MODEL_LABELS = {"rf": "Random Forest", "lasso": "Lasso", "svm": "SVM"}
 
 def run_current_pipeline() -> dict[str, pd.DataFrame]:
     from main import run_pipeline  # noqa: PLC0415
-    from uitnodigingsregel.evaluate import load_settings  # noqa: PLC0415
+    from uitnodigingsregel.settings import load_settings  # noqa: PLC0415
 
     settings = load_settings()
     # Use committed fixture models — keeps comparison deterministic (no retraining noise)

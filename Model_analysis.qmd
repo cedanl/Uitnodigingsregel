@@ -45,28 +45,28 @@ from sklearn.model_selection import train_test_split
 
 import student_signal
 
-from uitnodigingsregel.analyze import (
+from student_signal.analyze import (
     analyze_missing_data,
     display_top_features,
     parse_model_metrics,
 )
-from uitnodigingsregel.dataset import read_student_data
-from uitnodigingsregel.evaluate import (
+from student_signal.evaluate import (
     display_model_results,
     generate_stoplight_evaluation,
-    load_settings,
     process_evaluation_results,
     save_model_metrics,
     save_threshold_analysis,
 )
-from uitnodigingsregel.modeling.predict import MODEL_FILES
-from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
-from uitnodigingsregel.report import REPORT_MODELS_DIR, resolve_report_data
-from uitnodigingsregel.visualize import (
+from student_signal.visualize import (
     generate_precision_plot,
     generate_sensitivity_plot,
     generate_svm_importance_plot,
 )
+from uitnodigingsregel.dataset import read_student_data
+from uitnodigingsregel.modeling.predict import MODEL_FILES
+from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
+from uitnodigingsregel.report import REPORT_MODELS_DIR, resolve_report_data
+from uitnodigingsregel.settings import load_settings
 
 warnings.filterwarnings('ignore')
 
@@ -148,10 +148,16 @@ try:
         best_svm_model = joblib.load('models/support_vector_machine.joblib')
 
     # --- 3. Stoplight evaluation on test set ---
+    # Random Forest uses the unscaled data, Lasso and SVM the scaled data
     model_predictions = {
-        'Random Forest': (test_data_rf, best_rf_model, False),
-        'Lasso': (test_data_sdd, best_lasso_model, True),
-        'SVM': (test_data_sdd, best_svm_model, True)
+        'Random Forest': (test_data_rf, best_rf_model),
+        'Lasso': (test_data_sdd, best_lasso_model),
+        'SVM': (test_data_sdd, best_svm_model)
+    }
+    plot_models = {
+        'lasso': (best_lasso_model, test_data_sdd),
+        'rf': (best_rf_model, test_data_rf),
+        'svm': (best_svm_model, test_data_sdd)
     }
 
     evaluation_results = generate_stoplight_evaluation(
@@ -164,25 +170,14 @@ try:
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         save_model_metrics(
-            train_data=pd.concat([X_train, y_train], axis=1),
-            train_data_scaled=pd.concat([X_train_sdd, y_train_sdd], axis=1),
-            validation_data=test_data_rf,
-            validation_data_scaled=test_data_sdd,
-            rf_model=best_rf_model,
-            lasso_model=best_lasso_model,
-            svm_model=best_svm_model,
+            {
+                'Random Forest': (best_rf_model, X_train, y_train, X_test, y_test),
+                'Lasso': (best_lasso_model, X_train_sdd, y_train_sdd, X_test_sdd, y_test_sdd),
+                'SVM': (best_svm_model, X_train_sdd, y_train_sdd, X_test_sdd, y_test_sdd)
+            },
             dropout_column=dropout_column
         )
-        save_threshold_analysis(
-            train_data=pd.concat([X_train, y_train], axis=1),
-            train_data_scaled=pd.concat([X_train_sdd, y_train_sdd], axis=1),
-            validation_data=test_data_rf,
-            validation_data_scaled=test_data_sdd,
-            rf_model=best_rf_model,
-            lasso_model=best_lasso_model,
-            svm_model=best_svm_model,
-            dropout_column=dropout_column
-        )
+        save_threshold_analysis(model_predictions, dropout_column=dropout_column)
 except Exception as e:
     print(f"Error in stoplight evaluation: {e}")
     import traceback
@@ -273,7 +268,7 @@ print(display_model_results(model_results, 'SVM'))
 #| fig-width: 10
 #| fig-height: 6
 
-fig = generate_precision_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, validation_data_scaled=test_data_sdd, dropout_column=dropout_column, do_save=False)
+fig = generate_precision_plot(plot_models, dropout_column=dropout_column, do_save=False)
 plt.tight_layout(); plt.show()
 ```
 
@@ -286,7 +281,7 @@ plt.tight_layout(); plt.show()
 #| fig-width: 10
 #| fig-height: 6
 
-fig = generate_sensitivity_plot(test_data_rf, best_rf_model, best_lasso_model, best_svm_model, validation_data_scaled=test_data_sdd, dropout_column=dropout_column, do_save=False)
+fig = generate_sensitivity_plot(plot_models, dropout_column=dropout_column, do_save=False)
 plt.tight_layout(); plt.show()
 ```
 
@@ -376,7 +371,7 @@ sns.heatmap(train_df.isnull(), yticklabels=False, cbar=False, cmap='viridis', ax
 #| label: lasso-features
 #| output: asis
 
-print(display_top_features(best_lasso_model, train_df_sdd, 'lasso', n_features=5, dropout_column=dropout_column))
+print(display_top_features(best_lasso_model, train_df_sdd, n_features=5, dropout_column=dropout_column))
 ```
 
 # Random Forest Features
@@ -385,7 +380,7 @@ print(display_top_features(best_lasso_model, train_df_sdd, 'lasso', n_features=5
 #| label: rf-features
 #| output: asis
 
-print(display_top_features(best_rf_model, train_processed, 'rf', n_features=5, dropout_column=dropout_column))
+print(display_top_features(best_rf_model, train_processed, n_features=5, dropout_column=dropout_column))
 ```
 
 ## Voorbeeld van een beslissingsboom
@@ -417,7 +412,7 @@ plt.tight_layout()
 #| label: svm-features-text
 #| output: asis
 
-print(display_top_features(best_svm_model, train_df_sdd, 'svm', n_features=5, dropout_column=dropout_column))
+print(display_top_features(best_svm_model, train_df_sdd, n_features=5, dropout_column=dropout_column))
 ```
 
 ## SVM Feature Importance
@@ -429,7 +424,7 @@ print(display_top_features(best_svm_model, train_df_sdd, 'svm', n_features=5, dr
 #| fig-width: 14
 #| fig-height: 10
 
-fig = generate_svm_importance_plot(train_processed, best_svm_model, train_data_sdd=train_df_sdd, dropout_column=dropout_column, do_save=False)
+fig = generate_svm_importance_plot(train_processed, best_svm_model, train_data_scaled=train_df_sdd, dropout_column=dropout_column, do_save=False)
 ```
 
 # Uitleg

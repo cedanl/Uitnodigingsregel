@@ -18,9 +18,7 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 ├── src/uitnodigingsregel/       # Installable package
 │   ├── cli.py                   # CLI entrypoint (uitnodigingsregel command)
 │   ├── dataset.py               # Data loading and validation (load_student_data, detect_separator)
-│   ├── evaluate.py              # Model evaluation (load_settings, prepare_model_predictions, etc.)
-│   ├── visualize.py             # Plotting (generate_precision_plot, generate_sensitivity_plot, etc.)
-│   ├── analyze.py               # Analysis helpers (get_coefficient_table, get_top_svm_features, etc.)
+│   ├── settings.py              # Settings from metadata/config.yaml (load_settings)
 │   ├── report.py                # Quarto report: input data selection and rendering (render_report)
 │   ├── modeling/
 │   │   ├── train.py             # Model training (train_random_forest, train_lasso, train_svm)
@@ -47,6 +45,8 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 ├── Model_analysis.qmd           # Quarto analysis report
 └── main.py                      # Pipeline entrypoint
 ```
+
+Data preparation, ranking, evaluation, plots and analysis helpers come from the `student_signal` library (`student_signal.prepare`, `rank`, and the modules `evaluate`, `visualize`, `analyze`). This repo holds no copy of that code; changes to it go through cedanl/student-signal.
 
 ## How to Run
 ```bash
