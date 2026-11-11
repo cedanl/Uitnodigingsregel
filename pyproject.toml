@@ -34,16 +34,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/uitnodigingsregel"]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0",
-    "ruff>=0.8",
-]
-
 [tool.uv]
 cache-dir = "./.uv_cache"
-
-[tool.uv.sources]
 
 [tool.ruff]
 line-length = 100

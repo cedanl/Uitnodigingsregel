@@ -27,8 +27,8 @@ snapshots/
 ### Detect drift since last snapshot
 
 ```bash
-make snapshot-compare
-# or with an HTML report:
+uv run python snapshots/compare.py
+# with an HTML report:
 uv run python snapshots/compare.py --save
 ```
 
@@ -38,8 +38,7 @@ Output: per-model rank-shift summary and an overall verdict:
 ### Update snapshots after a deliberate model change
 
 ```bash
-make snapshot-update
-# or: uv run python snapshots/update.py --confirm
+uv run python snapshots/update.py --confirm
 ```
 
 Commit the changed CSV files and `.joblib` files together with the code change.
