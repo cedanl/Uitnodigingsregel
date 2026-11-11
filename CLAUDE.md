@@ -45,8 +45,7 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 ├── docs/                        # MkDocs site (GitHub Pages)
 ├── demo-video/                  # Scripts that record and compose the demo video in the README
 ├── Model_analysis.qmd           # Quarto analysis report
-├── main.py                      # Pipeline entrypoint
-└── Makefile                     # Convenience commands
+└── main.py                      # Pipeline entrypoint
 ```
 
 ## How to Run
@@ -57,6 +56,7 @@ uv run uitnodigingsregel             # Launch interactive app (CLI)
 uv run quarto render Model_analysis.qmd  # Render analysis report
 uv run ruff check src tests main.py  # Lint
 uv run pytest                        # Test
+uv run python snapshots/compare.py   # Compare pipeline output to the snapshot fixtures
 uv run --group docs mkdocs build --strict  # Build docs
 ```
 
