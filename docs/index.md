@@ -4,6 +4,12 @@ De Uitnodigingsregel signaleert studenten met een verhoogd risico op uitval in h
 
 De methode is ontwikkeld in het promotieonderzoek van Irene Eegdeman. Deze repository bevat een Python-implementatie met een app die op je eigen computer draait.
 
+## Demo
+
+De video laat in tweeënhalve minuut zien hoe de app werkt. De opname is gemaakt met de synthetische demo-data.
+
+<video src="https://github.com/cedanl/Uitnodigingsregel/releases/download/demo-videos/uitnodigingsregel-showcase-highlighted.mp4" controls width="100%"></video>
+
 ## Verder lezen
 
 - [Aan de slag](aan-de-slag.md): installeren en de app starten.

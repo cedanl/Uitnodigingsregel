@@ -21,6 +21,13 @@ Meer informatie over het voorkomen van studentenuitval door middel van verklarin
 
 Wil je de Uitnodigingsregel toepassen binnen jouw onderwijsinstelling? Houd dan rekening met een uitgebreide voorbereiding, waaronder een DPIA (Data Protection Impact Assessment) maar ook ethische toetsing en toetsing aan de AI-verordening. De Datacoalitie Datagedreven Onderzoek heeft deze methodiek zorgvuldig naar de praktijk vertaald. Lees [hier meer](https://datagedrevenonderzoekmbo.nl/themas/voorspelmodel) over dit proces en bekijk de [ontwikkelde producten](https://datagedrevenonderzoekmbo.nl/themas/voorspelmodel/praktijkpilot-de-uitnodigingsregel) die kunnen helpen bij een succesvolle implementatie van de Uitnodigingsregel.
 
+## Demo
+De video laat in tweeënhalve minuut zien hoe de app werkt: de analyse starten, de ranglijst lezen, de modelkwaliteit beoordelen en de resultaten downloaden. De opname is gemaakt met de synthetische demo-data.
+
+<video src="https://github.com/cedanl/Uitnodigingsregel/releases/download/demo-videos/uitnodigingsregel-showcase-highlighted.mp4" controls width="100%"></video>
+
+Speelt de video niet af? [Open het videobestand](https://github.com/cedanl/Uitnodigingsregel/releases/download/demo-videos/uitnodigingsregel-showcase-highlighted.mp4).
+
 
 # Aan de slag
 
