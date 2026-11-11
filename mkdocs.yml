@@ -73,6 +73,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Van data tot gesprek: van-data-tot-gesprek.md
   - Aan de slag: aan-de-slag.md
   - Je data aanleveren: data-aanleveren.md
   - Resultaten lezen: resultaten-lezen.md

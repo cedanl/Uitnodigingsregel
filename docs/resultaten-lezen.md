@@ -63,4 +63,4 @@ De precisie- en recallgrafieken in het rapport laten per percentage uitgenodigde
 - Deel uitkomsten alleen met direct betrokken begeleiders.
 - Gebruik het model niet voor selectie, uitsluiting of geautomatiseerde beslissingen.
 
-Voor invoering binnen een instelling zijn een DPIA, een ethische toetsing en een toetsing aan de AI-verordening nodig. De [Datacoalitie Datagedreven Onderzoek](https://datagedrevenonderzoekmbo.nl/themas/voorspelmodel) heeft hiervoor hulpmiddelen.
+Voor invoering binnen een instelling zijn een DPIA, een ethische toetsing en een toetsing aan de AI-verordening nodig. De [Datacoalitie Datagedreven Onderzoek](https://datagedrevenonderzoekmbo.nl/themas/uitnodigingsregel/) heeft hiervoor hulpmiddelen.
