@@ -22,7 +22,7 @@ Regel dit voordat je met studentgegevens werkt:
 - een toetsing aan de AI-verordening;
 - afspraken over wie de ranglijst ziet en wat er met een signaal gebeurt.
 
-De [Datacoalitie Datagedreven Onderzoek](https://datagedrevenonderzoekmbo.nl/themas/voorspelmodel) beschrijft dit proces en heeft in een praktijkpilot [producten ontwikkeld](https://datagedrevenonderzoekmbo.nl/themas/voorspelmodel/praktijkpilot-de-uitnodigingsregel) die bij de invoering helpen.
+De [Datacoalitie Datagedreven Onderzoek](https://datagedrevenonderzoekmbo.nl/themas/uitnodigingsregel/) beschrijft dit proces en heeft in een praktijkpilot [producten ontwikkeld](https://datagedrevenonderzoekmbo.nl/themas/uitnodigingsregel/praktijkpilot-de-uitnodigingsregel/) die bij de invoering helpen.
 
 ## 2. Data verzamelen
 
@@ -55,7 +55,7 @@ Uitleg: [Resultaten lezen](resultaten-lezen.md#de-ranglijst).
 Een hoge plaats in de ranglijst is een reden om een student uit te nodigen. De ranglijst zegt niet waarom een student risico loopt en ook niet wat er in het gesprek moet gebeuren. Dat bepaalt de begeleider, samen met de student.
 
 - Uitgangspunten voor het gebruik van de ranglijst: [Resultaten lezen](resultaten-lezen.md#uitgangspunten-bij-gebruik).
-- Hulpmiddelen voor begeleiders en voor de invoering: de [producten uit de praktijkpilot](https://datagedrevenonderzoekmbo.nl/themas/voorspelmodel/praktijkpilot-de-uitnodigingsregel) van de Datacoalitie.
+- Hulpmiddelen voor begeleiders en voor de invoering: de [producten uit de praktijkpilot](https://datagedrevenonderzoekmbo.nl/themas/uitnodigingsregel/praktijkpilot-de-uitnodigingsregel/) van de Datacoalitie.
 
 ## 7. Terugkijken
 
