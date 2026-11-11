@@ -23,7 +23,14 @@ De opname gebruikt de synthetische demo-data en traint de modellen in `models/` 
 
 ## Publiceren
 
-De video staat als bijlage bij de release `demo-videos`, omdat een videobestand in de repository niet in de README afspeelt:
+GitHub speelt een video alleen in de README af als het adres begint met `https://github.com/user-attachments/assets/`. Zo'n adres ontstaat door het bestand in de browser te uploaden:
+
+1. Open een issue in deze repository en scrol naar het tekstvak onder "Add a comment".
+2. Sleep `uitnodigingsregel-showcase-highlighted.mp4` in dat tekstvak.
+3. Wacht tot er een regel verschijnt die begint met `https://github.com/user-attachments/assets/` en klik op "Comment".
+4. Zet dat adres op een eigen regel in `README.md`, onder het kopje "Demo".
+
+De documentatiesite gebruikt het bestand bij de release `demo-videos`. Werk dat bij met:
 
 ```
 gh release upload demo-videos uitnodigingsregel-showcase-highlighted.mp4 uitnodigingsregel-showcase.mp4 --clobber
