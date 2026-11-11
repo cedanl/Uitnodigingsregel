@@ -19,7 +19,7 @@ dependencies = [
     "quarto-cli>=1.6",
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.0",
-    "streamlit>=1.40",
+    "streamlit>=1.50",
     "student_signal>=0.2.0",
     "xlsxwriter>=3.2.2",
 ]

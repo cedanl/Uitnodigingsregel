@@ -322,7 +322,7 @@ def show_main_screen() -> None:
             data=st.session_state.rapport_bytes,
             file_name="Modelkwaliteit_toelichting.html",
             mime="text/html",
-            use_container_width=True,
+            width="stretch",
         )
 
     st.divider()
@@ -335,7 +335,7 @@ def show_main_screen() -> None:
             st.markdown("**Random Forest** — rangschikking op uitvalrisico")
             event = st.dataframe(
                 ranked["rf"],
-                use_container_width=True,
+                width="stretch",
                 on_select="rerun",
                 selection_mode="single-row",
             )
@@ -357,13 +357,13 @@ def show_main_screen() -> None:
     with tab_lasso:
         with st.container(border=True):
             st.markdown("**Lasso** — rangschikking op uitvalrisico")
-            st.dataframe(ranked["lasso"], use_container_width=True)
+            st.dataframe(ranked["lasso"], width="stretch")
 
     # ── SVM ──
     with tab_svm:
         with st.container(border=True):
             st.markdown("**SVM** — rangschikking op uitvalrisico")
-            st.dataframe(ranked["svm"], use_container_width=True)
+            st.dataframe(ranked["svm"], width="stretch")
 
     # ── Downloads ──
     st.divider()
@@ -376,7 +376,7 @@ def show_main_screen() -> None:
             data=ranked["rf"].to_csv(index=False).encode("utf-8"),
             file_name="resultaten_rf.csv",
             mime="text/csv",
-            use_container_width=True,
+            width="stretch",
         )
     with dl_col2:
         st.download_button(
@@ -384,7 +384,7 @@ def show_main_screen() -> None:
             data=ranked["lasso"].to_csv(index=False).encode("utf-8"),
             file_name="resultaten_lasso.csv",
             mime="text/csv",
-            use_container_width=True,
+            width="stretch",
         )
     with dl_col3:
         st.download_button(
@@ -392,7 +392,7 @@ def show_main_screen() -> None:
             data=ranked["svm"].to_csv(index=False).encode("utf-8"),
             file_name="resultaten_svm.csv",
             mime="text/csv",
-            use_container_width=True,
+            width="stretch",
         )
 
 
