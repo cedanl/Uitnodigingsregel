@@ -24,9 +24,9 @@ Wil je de Uitnodigingsregel toepassen binnen jouw onderwijsinstelling? Houd dan 
 ## Demo
 De video laat in tweeënhalve minuut zien hoe de app werkt: de analyse starten, de ranglijst lezen, de modelkwaliteit beoordelen en de resultaten downloaden. De opname is gemaakt met de synthetische demo-data.
 
-<video src="https://github.com/cedanl/Uitnodigingsregel/releases/download/demo-videos/uitnodigingsregel-showcase-highlighted.mp4" controls width="100%"></video>
+[![Demo-video van de Uitnodigingsregel: klik om te openen](docs/assets/demo-video.jpg)](https://github.com/cedanl/Uitnodigingsregel/releases/download/demo-videos/uitnodigingsregel-showcase-highlighted.mp4)
 
-Speelt de video niet af? [Open het videobestand](https://github.com/cedanl/Uitnodigingsregel/releases/download/demo-videos/uitnodigingsregel-showcase-highlighted.mp4).
+Klik op de afbeelding om de video te openen. Afhankelijk van je browser wordt het bestand eerst gedownload.
 
 
 # Aan de slag
