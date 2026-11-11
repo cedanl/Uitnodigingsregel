@@ -12,6 +12,7 @@ De video laat in tweeënhalve minuut zien hoe de app werkt. De opname is gemaakt
 
 ## Verder lezen
 
+- [Van data tot gesprek](van-data-tot-gesprek.md): het hele proces in zeven stappen.
 - [Aan de slag](aan-de-slag.md): installeren en de app starten.
 - [Je data aanleveren](data-aanleveren.md): welke bestanden en kolommen nodig zijn.
 - [Resultaten lezen](resultaten-lezen.md): de ranglijst en het rapport over modelkwaliteit.
