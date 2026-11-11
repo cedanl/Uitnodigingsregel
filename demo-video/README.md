@@ -12,7 +12,7 @@ Scripts voor de video in de README. De video wordt opgenomen in een browser zond
 
 ## Opnieuw maken
 
-Nodig: `ffmpeg`, Quarto en de Python-pakketten `playwright` en `pillow` (`uv pip install playwright pillow`, daarna `uv run playwright install chromium`).
+Nodig: `ffmpeg` en de Python-pakketten `playwright` en `pillow` (`uv pip install playwright pillow`, daarna `uv run playwright install chromium`).
 
 1. Start de app in een eerste terminal: `uv run uitnodigingsregel`
 2. Voer in een tweede terminal, vanuit de map `demo-video`, de scripts in deze volgorde uit: `record.py`, `overlays.py`, `compose.py`, `verify.py`.

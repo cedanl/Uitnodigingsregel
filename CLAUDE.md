@@ -10,7 +10,7 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 - Python 3.13, uv for dependency management
 - scikit-learn (RF, Lasso, SVM), pandas, matplotlib/seaborn
 - Streamlit for interactive app
-- Quarto for model analysis report
+- Quarto for model analysis report (installed with the package through the `quarto-cli` dependency)
 - ruff for linting/formatting
 
 ## Project Structure

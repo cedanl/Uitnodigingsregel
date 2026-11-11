@@ -16,6 +16,7 @@ dependencies = [
     "pandas>=2.2.3",
     "python-docx>=1.2.0",
     "pyyaml>=6.0.2",
+    "quarto-cli>=1.6",
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.0",
     "streamlit>=1.40",

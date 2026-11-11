@@ -24,7 +24,7 @@ Wil je de Uitnodigingsregel toepassen binnen jouw onderwijsinstelling? Houd dan 
 ## Demo
 De video laat in tweeënhalve minuut zien hoe de app werkt: de analyse starten, de ranglijst lezen, de modelkwaliteit beoordelen en de resultaten downloaden. De opname is gemaakt met de synthetische demo-data.
 
-https://github.com/user-attachments/assets/f3422190-8dc4-4e4f-a314-1975ccd0f1ee
+https://github.com/user-attachments/assets/84753be8-9766-4323-a829-636e53b1a781
 
 
 # Aan de slag
@@ -70,7 +70,7 @@ uitnodigingsregel
    uv sync
    ```
 
-Voor het rapport over modelkwaliteit is daarnaast [Quarto](https://quarto.org/docs/get-started/) nodig.
+Quarto, waarmee de app het rapport over modelkwaliteit maakt, wordt in deze stap mee geïnstalleerd.
 
 ## Gebruik
 

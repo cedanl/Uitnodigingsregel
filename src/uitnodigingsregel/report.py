@@ -1,7 +1,9 @@
 """Rendering of the Quarto model analysis report and selection of its input data."""
 
 import os
+import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -15,6 +17,21 @@ DEMO_LABEL = "de synthetische demo-data"
 
 class ReportError(RuntimeError):
     """The report could not be rendered; the message holds the end of Quarto's output."""
+
+
+def find_quarto() -> str | None:
+    """Locate the Quarto executable.
+
+    Quarto is installed with the package, next to the Python interpreter. That
+    directory is searched first, because it is not on PATH when the app is
+    started without activating the environment.
+
+    Returns:
+        Path to the Quarto executable, or None if it is not installed.
+    """
+    scripts_dir = str(Path(sys.executable).parent)
+    search_path = os.pathsep.join([scripts_dir, os.environ.get("PATH", "")])
+    return shutil.which("quarto", path=search_path)
 
 
 def resolve_report_data(settings: dict) -> tuple[Path, str]:
@@ -76,7 +93,13 @@ def render_report(
         result = subprocess.run(
             [quarto_bin, "render", REPORT_SOURCE],
             cwd=root_dir,
-            env={**os.environ, TRAIN_DATA_ENV: str(train_path), TRAIN_LABEL_ENV: train_label},
+            env={
+                **os.environ,
+                # Quarto runs the report's code with this interpreter: it has the package
+                "QUARTO_PYTHON": sys.executable,
+                TRAIN_DATA_ENV: str(train_path),
+                TRAIN_LABEL_ENV: train_label,
+            },
             capture_output=True,
             text=True,
         )

@@ -2,7 +2,6 @@
 
 import io
 import os
-import shutil
 from pathlib import Path
 
 import httpx
@@ -21,7 +20,7 @@ from uitnodigingsregel.modeling.predict import (
     save_fingerprint,
 )
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
-from uitnodigingsregel.report import DEMO_LABEL, ReportError, render_report
+from uitnodigingsregel.report import DEMO_LABEL, ReportError, find_quarto, render_report
 
 ROOT_DIR = Path.cwd()
 settings = load_settings()
@@ -290,7 +289,7 @@ def show_main_screen() -> None:
     studentnr_col = settings["studentnumber_column"]
 
     # ── Quarto rapport ──
-    quarto_bin = shutil.which("quarto")
+    quarto_bin = find_quarto()
     train_source, train_label = st.session_state.rapport_bron
 
     st.markdown("#### Modelkwaliteit & Toelichting")
@@ -301,9 +300,10 @@ def show_main_screen() -> None:
 
     if quarto_bin is None:
         st.warning(
-            "Het rapport kan niet gemaakt worden, omdat Quarto niet is geïnstalleerd. "
-            "Installeer Quarto via [quarto.org](https://quarto.org/docs/get-started/) "
-            "en start de app daarna opnieuw."
+            "Het rapport kan niet gemaakt worden, omdat Quarto niet is gevonden. "
+            "Quarto hoort met de installatie mee te komen. Voer de installatie opnieuw uit, "
+            "of installeer Quarto via [quarto.org](https://quarto.org/docs/get-started/). "
+            "Start de app daarna opnieuw."
         )
     else:
         if st.button("Genereer rapport", type="primary"):

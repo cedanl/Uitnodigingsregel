@@ -43,7 +43,7 @@ Je kunt de app direct uitproberen met de meegeleverde synthetische demo-data. Vo
         uv sync
         ```
 
-Voor het rapport over modelkwaliteit is daarnaast [Quarto](https://quarto.org/docs/get-started/) nodig. Zonder Quarto werkt de app, maar kun je geen rapport maken.
+Quarto, waarmee de app het rapport over modelkwaliteit maakt, wordt bij beide manieren mee geïnstalleerd.
 
 ## De app gebruiken
 

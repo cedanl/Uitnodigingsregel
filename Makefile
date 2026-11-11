@@ -13,7 +13,7 @@ PYTHON_VERSION = 3.13
 ## Render Quarto notebooks
 .PHONY: render-notebooks
 render-notebooks:
-	quarto render Model_analysis.qmd
+	uv run quarto render Model_analysis.qmd
 
 ## Install Python Dependencies
 .PHONY: requirements
