@@ -1,5 +1,6 @@
 """Tests for report data selection and rendering."""
 
+import subprocess
 import sys
 from pathlib import Path
 
@@ -11,9 +12,12 @@ from uitnodigingsregel.report import (
     TRAIN_DATA_ENV,
     TRAIN_LABEL_ENV,
     ReportError,
+    find_quarto,
     render_report,
     resolve_report_data,
 )
+
+DEMO_TRAIN = Path(__file__).resolve().parents[1] / "data/01-raw/demo/synth_data_train.csv"
 
 
 def _settings(tmp_path: Path) -> dict:
@@ -98,3 +102,34 @@ def test_render_reports_quarto_failure(tmp_path: Path) -> None:
     quarto = _write_fake_quarto(tmp_path, "import sys\nsys.exit('kernel niet gevonden')\n")
     with pytest.raises(ReportError, match="kernel niet gevonden"):
         render_report(quarto, b"inhoud", "label", tmp_path)
+
+
+def test_find_quarto_returns_the_quarto_installed_with_the_package() -> None:
+    quarto = find_quarto()
+
+    assert quarto is not None
+    version = subprocess.run([quarto, "--version"], capture_output=True, text=True)
+    assert version.returncode == 0, version.stderr
+    assert version.stdout.strip()[0].isdigit()
+
+
+def test_find_quarto_looks_next_to_the_interpreter_when_path_is_empty(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PATH", "")
+
+    quarto = find_quarto()
+
+    assert quarto is not None
+    assert Path(quarto).parent == Path(sys.executable).parent
+
+
+def test_render_report_with_installed_quarto_on_demo_data() -> None:
+    root_dir = Path(__file__).resolve().parents[1]
+    try:
+        html = render_report(find_quarto(), DEMO_TRAIN, DEMO_LABEL, root_dir).decode("utf-8")
+    finally:
+        (root_dir / REPORT_OUTPUT).unlink(missing_ok=True)
+
+    assert f"uitgevoerd op {DEMO_LABEL}" in html
+    assert "Model Aanbeveling en Evaluatie" in html

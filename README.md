@@ -70,7 +70,7 @@ uitnodigingsregel
    uv sync
    ```
 
-Voor het rapport over modelkwaliteit is daarnaast [Quarto](https://quarto.org/docs/get-started/) nodig.
+Quarto, waarmee de app het rapport over modelkwaliteit maakt, wordt in deze stap mee geïnstalleerd.
 
 ## Gebruik
 

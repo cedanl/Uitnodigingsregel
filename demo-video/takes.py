@@ -254,7 +254,7 @@ TAKE_REPORT = [
     (
         "sub",
         {
-            "text": "Voor het rapport is Quarto nodig. Zonder Quarto werkt de ranglijst wel, het rapport niet."
+            "text": "De app maakt het rapport op je eigen computer. Daar hoef je niets voor te installeren."
         },
     ),
     ("wait", {"s": 1.0}),
@@ -263,9 +263,9 @@ TAKE_REPORT = [
         {
             "id": "c2_quarto",
             "targets": [{"css": '[data-testid="stSpinner"]'}, {"text": "Rapport genereren"}],
-            "label": "Vereist: Quarto",
-            "text": "Quarto installeer je apart. Het rapport maken duurt even: de modellen worden opnieuw getraind.",
-            "kleur": "rood",
+            "label": "Rapport maken",
+            "text": "Dit duurt even: de modellen worden voor het rapport apart getraind.",
+            "kleur": "oranje",
             "hold": 4.8,
         },
     ),
