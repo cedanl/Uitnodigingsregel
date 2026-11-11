@@ -43,6 +43,7 @@ Follow CEDA technical standards: https://github.com/cedanl/.github/tree/main/sta
 ├── tests/                       # Unit tests and pipeline smoke test
 ├── snapshots/                   # Golden master comparison of pipeline output
 ├── docs/                        # MkDocs site (GitHub Pages)
+├── demo-video/                  # Scripts that record and compose the demo video in the README
 ├── Model_analysis.qmd           # Quarto analysis report
 ├── main.py                      # Pipeline entrypoint
 └── Makefile                     # Convenience commands

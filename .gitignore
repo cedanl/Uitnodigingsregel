@@ -189,6 +189,10 @@ reports/figures/
 # ruff cache
 .ruff_cache/
 
+# Demo video: recordings and intermediate files
+demo-video/build/
+demo-video/*.mp4
+
 # Rendered Quarto output
 *.html
 
