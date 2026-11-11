@@ -6,13 +6,13 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from uitnodigingsregel.evaluate import load_settings
 from uitnodigingsregel.modeling.predict import (
     MODEL_FILES,
     check_models_match_data,
     compute_data_fingerprint,
     load_models,
 )
+from uitnodigingsregel.settings import load_settings
 
 ROOT_DIR = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT_DIR))

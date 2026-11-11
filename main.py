@@ -6,13 +6,13 @@ import pandas as pd
 import student_signal
 
 from uitnodigingsregel.dataset import load_student_data
-from uitnodigingsregel.evaluate import load_settings
 from uitnodigingsregel.modeling.predict import (
     compute_data_fingerprint,
     load_models,
     save_fingerprint,
 )
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
+from uitnodigingsregel.settings import load_settings
 
 
 def run_pipeline(

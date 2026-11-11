@@ -12,7 +12,6 @@ from docx import Document
 
 from uitnodigingsregel.app.styles import MAIN_CSS, START_CSS
 from uitnodigingsregel.dataset import DataValidationError, load_student_data
-from uitnodigingsregel.evaluate import load_settings
 from uitnodigingsregel.modeling.predict import (
     check_models_match_data,
     compute_data_fingerprint,
@@ -21,6 +20,7 @@ from uitnodigingsregel.modeling.predict import (
 )
 from uitnodigingsregel.modeling.train import train_lasso, train_random_forest, train_svm
 from uitnodigingsregel.report import DEMO_LABEL, ReportError, find_quarto, render_report
+from uitnodigingsregel.settings import load_settings
 
 ROOT_DIR = Path.cwd()
 settings = load_settings()

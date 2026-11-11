@@ -18,6 +18,10 @@ Functies van het Python-package `uitnodigingsregel`, per module.
 
 ::: uitnodigingsregel.report
 
-## Evaluatie
+## Instellingen
 
-::: uitnodigingsregel.evaluate
+::: uitnodigingsregel.settings
+
+## Evaluatie, grafieken en analyse
+
+De functies voor evaluatie, grafieken en analyse in het rapport komen uit de library [`student_signal`](https://github.com/cedanl/student-signal) (modules `evaluate`, `visualize` en `analyze`).
