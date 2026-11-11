@@ -27,7 +27,7 @@ SQL-voorbeeldcode om deze bestanden uit je studentinformatiesysteem te halen sta
 
 De namen van beide kolommen zijn instelbaar. Heten ze bij jou anders, pas dan `studentnumber_column` en `dropout_column` aan in `src/uitnodigingsregel/metadata/config.yaml`.
 
-De identificatie mag elk nummer zijn waarmee je de student terugvindt, niet per se het studentnummer. De waarde moet op dit moment wel een getal zijn; een naam of code met letters werkt nog niet.
+De identificatie mag elke waarde zijn waarmee je de student terugvindt: een studentnummer, een ander nummer of een code met letters. De modellen gebruiken deze kolom niet als kenmerk.
 
 **Overige kolommen**
 

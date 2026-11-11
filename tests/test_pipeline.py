@@ -11,6 +11,7 @@ from uitnodigingsregel.modeling.predict import (
     MODEL_FILES,
     check_models_match_data,
     compute_data_fingerprint,
+    load_models,
 )
 
 ROOT_DIR = Path(__file__).parents[1]
@@ -84,3 +85,29 @@ def test_duplicate_rows_do_not_shift_scores_between_students(
 
     for expected_df, ranked_df in zip(expected, ranked, strict=True):
         pd.testing.assert_frame_equal(expected_df, ranked_df)
+
+
+def test_pipeline_accepts_text_ids_and_keeps_them_out_of_the_models(
+    settings: dict, tmp_path: Path
+) -> None:
+    id_col = settings["studentnumber_column"]
+    train_df = pd.read_csv(DEMO_TRAIN, sep="\t").drop_duplicates()
+    pred_df = pd.read_csv(DEMO_PRED, sep="\t").drop_duplicates()
+    train_df[id_col] = "s" + train_df[id_col].astype(str)
+    pred_df[id_col] = "s" + pred_df[id_col].astype(str)
+    train_path = tmp_path / "train.csv"
+    pred_path = tmp_path / "pred.csv"
+    train_df.to_csv(train_path, sep="\t", index=False)
+    pred_df.to_csv(pred_path, sep="\t", index=False)
+    models_dir = tmp_path / "models"
+
+    ranked = run_pipeline(train_path, pred_path, settings, models_dir=models_dir)
+    numeric_ids = run_pipeline(DEMO_TRAIN, DEMO_PRED, settings, models_dir=tmp_path / "other")
+
+    _assert_ranked_lists_cover_students(ranked, pred_df, id_col)
+    rf_model, _, _ = load_models(models_dir)
+    rf_numeric, _, _ = load_models(tmp_path / "other")
+    assert rf_model.n_features_in_ == rf_numeric.n_features_in_
+    assert rf_model.n_features_in_ <= train_df.shape[1] - 2
+    lasso_text, lasso_numeric = ranked[1], numeric_ids[1]
+    assert lasso_text["voorspelling"].tolist() == lasso_numeric["voorspelling"].tolist()

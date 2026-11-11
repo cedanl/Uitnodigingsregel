@@ -178,6 +178,7 @@ data/01-raw/user_data/
 models/*.joblib
 models/training_data.json
 models/report/
+snapshots/fixtures/models/training_data.json
 models/predictions/
 reports/*.txt
 reports/figures/

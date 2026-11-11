@@ -344,10 +344,13 @@ def show_main_screen() -> None:
             idx = event.selection.rows[0]
             rij = ranked["rf"].iloc[idx]
             student_id = str(rij[studentnr_col])
-            probability = float(rij.get("uitvalrisico", rij.get("probability", rij.iloc[1])))
-            pred_rij = prepared.pred_df[prepared.pred_df[studentnr_col] == rij[studentnr_col]]
-            if not pred_rij.empty:
-                student_data = pred_rij.iloc[0].to_dict()
+            probability = float(rij["voorspelling"])
+            posities = prepared.pred_ids.index[prepared.pred_ids == rij[studentnr_col]]
+            if len(posities) > 0:
+                student_data = {
+                    studentnr_col: rij[studentnr_col],
+                    **prepared.pred_df.iloc[posities[0]].to_dict(),
+                }
                 toon_eduplan(student_id, student_data, probability)
 
     # ── Lasso ──

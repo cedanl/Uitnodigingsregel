@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from importlib.metadata import version
 from pathlib import Path
 
 import joblib
@@ -41,9 +42,11 @@ def compute_data_fingerprint(train_df: pd.DataFrame) -> str:
         train_df: Training DataFrame as read from file.
 
     Returns:
-        Hex digest that changes when column names or cell values change.
+        Hex digest that changes when column names, cell values or the version of
+        student_signal change. Each of those makes stored models unusable.
     """
     digest = hashlib.sha256()
+    digest.update(version("student_signal").encode("utf-8"))
     digest.update("\x1f".join(map(str, train_df.columns)).encode("utf-8"))
     digest.update(pd.util.hash_pandas_object(train_df, index=False).values.tobytes())
     return digest.hexdigest()
