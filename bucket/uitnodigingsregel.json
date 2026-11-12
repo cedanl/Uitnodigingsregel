@@ -1,12 +1,12 @@
 {
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Dropout prediction models for student intervention planning",
     "homepage": "https://github.com/cedanl/Uitnodigingsregel",
     "license": "MIT",
     "depends": "uv",
-    "url": "https://github.com/cedanl/Uitnodigingsregel/archive/refs/tags/v0.1.0.zip",
-    "hash": "sha256:a8bb1917239585b46ea662f2f4cda3885513557e365dc374f1e21e187a35aff9",
-    "extract_dir": "Uitnodigingsregel-0.1.0",
+    "url": "https://github.com/cedanl/Uitnodigingsregel/archive/refs/tags/v0.2.0.zip",
+    "hash": "sha256:677bd266ccf07ace50ee732862960376838bef4b7843c54477b5ecf329acdca9",
+    "extract_dir": "Uitnodigingsregel-0.2.0",
     "installer": {
         "script": [
             "uv sync --directory \"$dir\"",
