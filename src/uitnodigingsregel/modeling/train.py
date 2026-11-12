@@ -35,7 +35,7 @@ def train_random_forest(
 
     grid_model = GridSearchCV(rf, rf_parameters, refit=True, n_jobs=-1, verbose=0)
     grid_model.fit(X, y)
-    best_rf_model = RandomForestRegressor(**grid_model.best_params_)
+    best_rf_model = RandomForestRegressor(**grid_model.best_params_, random_state=random_seed)
     best_rf_model.fit(X, y)
 
     model_path = Path(model_path)
@@ -111,7 +111,7 @@ def train_svm(
         verbose=0,
     )
     svm_gridsearch.fit(X, y)
-    best_svm_model = SVC(**svm_gridsearch.best_params_, probability=True)
+    best_svm_model = SVC(**svm_gridsearch.best_params_, probability=True, random_state=random_seed)
     best_svm_model.fit(X, y)
 
     model_path = Path(model_path)
