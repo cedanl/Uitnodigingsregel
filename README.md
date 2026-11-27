@@ -1,4 +1,4 @@
-# Uitnodigingsregel
+# <img src="references/logo-uitnodigingsregel.png" alt="Logo van de Uitnodigingsregel" height="40" align="right"> Uitnodigingsregel
 
 Python implementatie van de Uitnodigingsregel — een machine learning model dat studenten met een verhoogd uitvalrisico signaleert. Bedoeld voor data scientists en developers die het model opzetten en beheren binnen hun onderwijsinstelling.
 
